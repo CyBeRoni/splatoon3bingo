@@ -75,7 +75,7 @@ var bingo = function(bingoList, size, useMagicSquare) {
 		for (var i = 0; i < 5; i++) {
 		  items.push( encodeURIComponent($(cells[i]).html()) );
 		}
-        window.open('go1den.github.io/s3-bingo/popout.html#'+ name +'='+ items.join(';;;'),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=100, height=600");
+        window.open('popout.html#'+ name +'='+ items.join(';;;'),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=100, height=600");
 	});
 
 	$("#bingo tr td:not(.popout), #selected td").toggle(
