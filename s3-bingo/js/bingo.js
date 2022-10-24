@@ -262,6 +262,28 @@ function refreshBoard(showNames) {
     }
 }
 
+function randomWeapon() {
+    var currentObj, img, name, idx;
+    document.getElementById("randomWeapon").innerHTML = "";
+    if (document.getElementById("randomIgnore").checked === true) {
+        document.getElementById("randomObey").disabled = true;
+        Math.seedrandom();
+        idx = Math.floor(bingoList[1].length * Math.random()); //should be total chaos in random assignment
+        console.log(idx);
+    } else {
+        document.getElementById("randomIgnore").disabled = true;
+        idx = Math.floor(bingoList[1].length * Math.random()); //should preserve seed order
+        console.log(idx);
+    }
+    if (idx == bingoList[1].length) { RNG--; } //fix a miracle
+    currentObj = bingoList[1][idx];
+    img = currentObj.image;
+    name = currentObj.name;
+    $('#randomWeapon').append("<td><image width=70px height=70px src=" + img + "></td>");
+    $('#randomWeapon').append("<td><strong style=\"color: orange\">Supplied Weapon</strong><br><strong style=\"color: white\">You have been loaned the " + name + "!</strong></td>");
+    document.getElementById("randomWeapon").style = "background-color: grey";
+}
+
 function reseedPage() {
 	var qSeed = "?seed=" + Math.ceil(999999 * Math.random());
 	window.location = qSeed;
