@@ -1,6 +1,6 @@
 var bingoBoard = [];
 
-var bingo = function(bingoList, size, useMagicSquare) {
+var bingo = function(weaponMap, size) {
 
 	function gup( name ) {
 		name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
@@ -26,7 +26,7 @@ var bingo = function(bingoList, size, useMagicSquare) {
 	Math.seedrandom(SEED); //sets up the RNG
 	var MAX_SEED = 999999; //1 million cards
 	var results = $("#results");
-	results.append ("<p>Splatoon 3 Weapons Bingo <strong>v1</strong>&emsp;Seed: <strong>" +
+	results.append ("<p>Splatoon 3 Weapons Bingo <strong>v2</strong>&emsp;Seed: <strong>" +
 	SEED + "</strong></p><p>&emsp;Join us on <strong><a href=\"https://discord.gg/CErcb4gVqE\">Discord</a></strong></p></p>");
 
 	var noTypeCount = 0;
@@ -163,81 +163,146 @@ var bingo = function(bingoList, size, useMagicSquare) {
 		return value;
 	}
 
-	function checkLine (i, typesA) {
-		var synergy = 0;
-		if (typeof typesA != 'undefined') {
-			for (var j=0; j<lineCheckList[i].length; j++) {
-				var typesB = bingoBoard[lineCheckList[i][j]+1].types;
-				if (typeof typesB != 'undefined') {
-					for (var k=0; k < typesA.length; k++) {
-						for (var l=0; l < typesB.length; l++) {
-							if (typesA[k] == typesB[l]) {
-								synergy++; // if match increase
-								if (k==0) { synergy++; } // if main type increase
-								if (l==0) { synergy++; } // if main type increase
-							}
-						}
-					}
-				}
-			}
-		}
-		return synergy;
-	}
-
-//	var bingoBoard = []; //the board itself stored as an array first
-	for (var i=1;i<=25;i++) {
-	    if (useMagicSquare) {
-		    bingoBoard[i] = {difficulty: difficulty(i)}; //array with objects that store difficulty in order 1-25
-         } else {
-            bingoBoard[i] = {difficulty: 1}; //set it to 1 because we are expecting all elements to be in bingoList[1]
-         }
-		console.log(bingoBoard[i].difficulty);
-	}
-
-	//populate the bingo board in the array
-	if (useMagicSquare) {
-        for (i=1; i<=25; i++) {
-            var getDifficulty = bingoBoard[i].difficulty; // difficulty of current square
-            var RNG = Math.floor(bingoList[getDifficulty].length * Math.random());
-            if (RNG == bingoList[getDifficulty].length) { RNG--; } //fix a miracle
-            var j = 0, synergy = 0, currentObj = null, minSynObj = null;
-
-            do {
-                currentObj = bingoList[getDifficulty][(j+RNG)%bingoList[getDifficulty].length];
-                synergy = checkLine(i, currentObj.types);
-                if (minSynObj == null || synergy < minSynObj.synergy) {
-                  minSynObj = { synergy: synergy, value: currentObj };
-                }
-                j++;
-            } while ((synergy != 0) && (j<bingoList[getDifficulty].length));
-
-            bingoBoard[i].types = minSynObj.value.types;
-            bingoBoard[i].name = minSynObj.value[LANG] || minSynObj.value.name;
-            bingoBoard[i].synergy = minSynObj.synergy;
-            bingoBoard[i].image = minSynObj.value.image;
+	function isDuplicateType (myBoard, i, currentWeapon) {
+        if(myBoard[i] !== undefined && myBoard[i] == currentWeapon) {
+            return true;
         }
-	} else { //since everything is in bingoList[1], we just want to generate a unique list of 25 elements to grab
-	    var indices = [];
-	    for (i=0; i<25; i++) {
-	        var foundUnusedElement = false;
-	        do {
-                var RNG = Math.floor(bingoList[1].length * Math.random());
-                if (RNG == bingoList[1].length) { RNG--; }
-                if (!indices.includes(RNG)) {
-                    indices.push(RNG);
-                    foundUnusedElement = true;
-                }
-            } while (!foundUnusedElement);
+        return false;
+	}
+
+	function avoidsDuplicatingTypesInRows (myBoardArray, i, currentWeapon) {
+	    var i;
+	    var row = Math.floor(i/5);
+	    var col = i % 5;
+	    var isTLBR = (i % 6) == 0;
+	    var isBLTR = (i % 4) == 0 && i > 0;
+	    //if row contains same type, return false
+	    for (var x=0+(5*row); x < 5+(5*row); x++) {
+	        i = x;
+	        if(isDuplicateType(myBoardArray, i, currentWeapon)) {
+	            return false;
+	        }
 	    }
-	    for (i=1; i<=25; i++) {
-	        currentObj = bingoList[1][indices[i-1]];
-	        console.log(currentObj)
+        //if column contains same type, return false
+	    for (var y=0; y<5; y++) {
+	        i = col + 5*y;
+	        if(isDuplicateType(myBoardArray, i, currentWeapon)) {
+	            return false;
+	        }
+	    }
+	    //if isTLBR and TLBR contains same type, return false
+	    if (isTLBR) {
+	        var indices = [0, 6, 12, 18, 24];
+	        for (index in indices) {
+	            i = indices[index];
+                if(isDuplicateType(myBoardArray, i, currentWeapon)) {
+                    return false;
+                }
+	        }
+	    }
+	    //if isBLTR and BLTR contains same type, return false
+	    if (isBLTR) {
+            var indices = [4, 8, 12, 16, 20];
+            for (index in indices) {
+                i = indices[index];
+                if(isDuplicateType(myBoardArray, i, currentWeapon)) {
+                    return false;
+                }
+            }
+	    }
+	    return true;
+	}
+
+    function getArrayOfWeaponTypesForBoard() {
+        var weaponTypes = Array.from(weaponMap.keys());
+        var currentWeaponType;
+        var mapOfWeaponTypesToFrequencyInBoard = new Map();
+        var weaponTypesOnThisBoard = [];
+        var retries;
+        var foundAcceptableWeaponType;
+        var thisBoardsWeapons = [];
+        for (i=0; i<25; i++) {
+            var tempWeaponTypes = weaponTypes.map((x) => x);
+            foundAcceptableWeaponType = false;
+            retries = 15;
+            do {
+                var RNG = Math.floor(tempWeaponTypes.length * Math.random());
+                if (RNG == tempWeaponTypes.length) {
+                    RNG--;
+                }
+                currentWeaponType = tempWeaponTypes[RNG];
+                if (currentWeaponType == undefined) {
+                    console.log("Error weapon type undefined");
+                }
+                if (!mapOfWeaponTypesToFrequencyInBoard.has(currentWeaponType)
+                    || mapOfWeaponTypesToFrequencyInBoard.get(currentWeaponType) < weaponMap.get(currentWeaponType).length) {
+                    if (avoidsDuplicatingTypesInRows(weaponTypesOnThisBoard, i, currentWeaponType)) {
+                        weaponTypesOnThisBoard.push(currentWeaponType);
+                        mapOfWeaponTypesToFrequencyInBoard.set(currentWeaponType, mapOfWeaponTypesToFrequencyInBoard.get(currentWeaponType) + 1 || 1);
+                        foundAcceptableWeaponType = true;
+                    }
+                }
+                tempWeaponTypes = tempWeaponTypes.filter(function(value) {
+                    return value != currentWeaponType;
+                });
+                retries -=1;
+            } while (!foundAcceptableWeaponType && tempWeaponTypes.length > 0);
+        }
+        if (weaponTypesOnThisBoard.length < 25) {
+            console.log("error unable to generate card");
+            //break;
+        }
+        return weaponTypesOnThisBoard;
+    }
+
+	function generateBingoBoard() {
+	    var weaponTypesOnThisBoard;
+	    do {
+	        weaponTypesOnThisBoard = getArrayOfWeaponTypesForBoard();
+	    } while (weaponTypesOnThisBoard.length < 25);
+        var thisBoardsWeapons = [];
+        for (i=0; i<25; i++) {
+            foundUnusedElement = false;
+            retries = 50;
+            do {
+                var currentWeaponType = weaponTypesOnThisBoard[i];
+                var currentWeaponTypeList = weaponMap.get(currentWeaponType);
+                var RNG = Math.floor(currentWeaponTypeList.length * Math.random());
+                if (RNG == currentWeaponTypeList.length) {
+                    RNG--;
+                }
+                var currentObj = currentWeaponTypeList[RNG];
+                if (!thisBoardsWeapons.includes(currentWeaponTypeList[RNG])) {
+                    thisBoardsWeapons.push(currentWeaponTypeList[RNG]);
+                    var remainingWeapons = currentWeaponTypeList.filter(function(value) {
+                        return value != currentWeaponType;
+                    });
+                    weaponMap.set(currentWeaponType, remainingWeapons)
+                    foundUnusedElement = true;
+                } else {
+                    retries--;
+                }
+            } while (!foundUnusedElement && retries > 0);
+            if (retries <= 0) {
+                break;
+            }
+        }
+        return thisBoardsWeapons;
+	}
+
+	for (var i=1;i<=25;i++) {
+        bingoBoard[i] = {difficulty: 1}; //set it to 1 because we are expecting all elements to be in bingoList[1]
+	}
+
+	//populate the bingo board
+    var generatedCard = generateBingoBoard();
+    for (i=0; i<25; i++) {
+        currentObj = generatedCard[i];
 //            bingoBoard[i].types = currentObj.value.types;
 //            bingoBoard[i].synergy = currentObj.synergy;
-            bingoBoard[i].name = currentObj.name;
-            bingoBoard[i].image = currentObj.image;
-	    }
-	}
+        bingoBoard[i+1].name = currentObj.name;
+        bingoBoard[i+1].image = currentObj.image;
+    }
 
 	//populate the actual table on the page
 	for (i=1; i<=25; i++) {
@@ -249,7 +314,6 @@ var bingo = function(bingoList, size, useMagicSquare) {
 }; // setup
 
 function refreshBoard(showNames) {
-    console.log("refreshing board");
     for (i=1; i<=25; i++) {
       document.getElementById("slot" + i).innerHTML = "";
 
@@ -262,21 +326,36 @@ function refreshBoard(showNames) {
     }
 }
 
+function getAllWeapons() {
+    var result = [];
+    var mapKeys = Array.from(weaponMap.keys());
+    for (key in mapKeys) {
+        var value = weaponMap.get(mapKeys[key]);
+        for (val in value) {
+            result.push(value[val]);
+        }
+    }
+    return result;
+}
+
 function randomWeapon() {
     var currentObj, img, name, idx;
+    var RNG;
+    var allWeapons = getAllWeapons();
+    console.log(allWeapons);
     document.getElementById("randomWeapon").innerHTML = "";
     if (document.getElementById("randomIgnore").checked === true) {
         document.getElementById("randomObey").disabled = true;
         Math.seedrandom();
-        idx = Math.floor(bingoList[1].length * Math.random()); //should be total chaos in random assignment
-        console.log(idx);
+        idx = Math.floor(allWeapons.length * Math.random()); //should be total chaos in random assignment
     } else {
         document.getElementById("randomIgnore").disabled = true;
-        idx = Math.floor(bingoList[1].length * Math.random()); //should preserve seed order
-        console.log(idx);
+        idx = Math.floor(allWeapons.length * Math.random()); //should preserve seed order
     }
-    if (idx == bingoList[1].length) { RNG--; } //fix a miracle
-    currentObj = bingoList[1][idx];
+    console.log(idx);
+    if (idx == allWeapons.length) { idx--; } //fix a miracle
+    currentObj = allWeapons[idx];
+    console.log("currentobj is :" + currentObj);
     img = currentObj.image;
     name = currentObj.name;
     $('#randomWeapon').append("<td><image width=70px height=70px src=" + img + "></td>");
