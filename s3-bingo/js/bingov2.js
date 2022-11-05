@@ -1,24 +1,61 @@
 var bingoBoard = [];
+var showWeaponNames = false;
+var showRandomizer = true;
+var showBoard = true;
 
-var bingo = function(weaponMap, size) {
+function getParam(name){
+	const urlParams = new URLSearchParams(window.location.search);
+	return urlParams.get(name);
+}
 
-	function gup( name ) {
-		name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
-		var regexS = "[\\?&]"+name+"=([^&#]*)";
-		var regex = new RegExp( regexS );
-		var results = regex.exec( window.location.href );
-		if(results == null)
-			 return "";
-		return results[1];
+function setupBoard(){
+	$('.popout').click(function() {
+	    refreshBoard(false);
+		var mode = null;
+		var line = $(this).attr('id');
+		var name = $(this).html();
+		var items = [];
+		var cells = $('#bingo .'+ line);
+		for (var i = 0; i < 5; i++) {
+		  items.push( encodeURIComponent($(cells[i]).html()) );
+		}
+        window.open('popout.html#'+ name +'='+ items.join(';;;'),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=100, height=600");
+	});
+
+	$("#bingo tr td:not(.popout), #selected td").toggle(
+		function () { $(this).addClass("greensquare"); },
+		function () { $(this).addClass("redsquare").removeClass("greensquare"); },
+		function () { $(this).removeClass("redsquare"); }
+	);
+
+	let bpos = getParam("b");
+	let wpos = getParam("w");
+	let spos = getParam("s");
+	if (bpos){
+		let [bposx, bposy] = bpos.split(",");
+		gsap.set("#results", { x: bposx, y: bposy});
 	}
 
-	var LANG = gup( 'lang' );
+	if (spos){
+		let [sposx, sposy] = spos.split(",");
+		gsap.set("#about_bingo", { x: sposx, y: sposy});
+	}
+
+	if (wpos){
+		let [wposx, wposy] = wpos.split(",");
+		gsap.set("#randomweapon", { x: wposx, y: wposy});
+	}
+
+}
+
+var bingo = function(weaponMap, size, reseed) {
+
+	var LANG = getParam( 'lang' );
 	if (LANG == '') LANG = 'name';
-	var SEED = gup( 'seed' );
-	var MODE = gup( 'mode' );
+	var SEED = getParam( 'seed' );
+	var MODE = getParam( 'mode' );
 
-	if(SEED == "") return reseedPage();
-
+	if(SEED == "" || reseed) SEED = reseedPage();
 	var cardtype = "Normal";
 
 	if (typeof size == 'undefined') size = 5;
@@ -26,8 +63,8 @@ var bingo = function(weaponMap, size) {
 	Math.seedrandom(SEED); //sets up the RNG
 	var MAX_SEED = 999999; //1 million cards
 	var results = $("#results");
-	results.append ("<p>Splatoon 3 Weapons Bingo <strong>v2</strong>&emsp;Seed: <strong>" +
-	SEED + "</strong></p><p>&emsp;Join us on <strong><a href=\"https://discord.gg/CErcb4gVqE\">Discord</a></strong></p></p>");
+	//results.append ("<p>Splatoon 3 Weapons Bingo <strong>v2</strong>&emsp;Seed: <strong>" + SEED + "</strong>");
+	document.querySelector("#seedinfo").innerHTML = `Seed: ${SEED}`;
 
 	var noTypeCount = 0;
 
@@ -65,24 +102,9 @@ var bingo = function(weaponMap, size) {
 		lineCheckList[25] = [0,6,12,18,20,21,22,23,19,14,9,4];
 	}
 
-	$('.popout').click(function() {
-	    refreshBoard(false);
-		var mode = null;
-		var line = $(this).attr('id');
-		var name = $(this).html();
-		var items = [];
-		var cells = $('#bingo .'+ line);
-		for (var i = 0; i < 5; i++) {
-		  items.push( encodeURIComponent($(cells[i]).html()) );
-		}
-        window.open('popout.html#'+ name +'='+ items.join(';;;'),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=100, height=600");
-	});
 
-	$("#bingo tr td:not(.popout), #selected td").toggle(
-		function () { $(this).addClass("greensquare"); },
-		function () { $(this).addClass("redsquare").removeClass("greensquare"); },
-		function () { $(this).removeClass("redsquare"); }
-	);
+
+
 
 	$("#row1").hover(function() { $(".row1").addClass("hover"); }, function() {	$(".row1").removeClass("hover"); });
 	$("#row2").hover(function() { $(".row2").addClass("hover"); }, function() {	$(".row2").removeClass("hover"); });
@@ -305,10 +327,32 @@ var bingo = function(weaponMap, size) {
     }
 
 	//populate the actual table on the page
-	for (i=1; i<=25; i++) {
-	  $('#slot'+i).append("<image width=70px height=70px src=" + bingoBoard[i].image + ">");
-	  $('#slot'+i).append(bingoBoard[i].name);
-	}
+	// for (i=1; i<=25; i++) {
+	//   $('#slot'+i).append("<image width=70px height=70px src=" + bingoBoard[i].image + ">");
+	//   $('#slot'+i).append(bingoBoard[i].name);
+	// }
+
+	gsap.timeline()
+	.set(".slotcontent", {onComplete: function(){
+		this.targets().forEach(e => {
+			let i = e.dataset.index;
+			e.querySelector(".slotweaponimage").innerHTML = `<img src=${bingoBoard[i].image}>`;
+			e.querySelector(".slotweaponname").innerHTML = bingoBoard[i].name;
+		});
+	}})
+	.set(".slotcontent", { opacity: 0, scale: 0})
+	.set(".slotweaponname", { opacity: 0})
+	.to(".slotcontent", {duration: 0.5, opacity: 1, stagger: {
+		each: 0.05,
+		grid: "auto",
+		from: "center"
+	} })
+	.to(".slotcontent", {duration: 1.0, scale: 1, ease: "back.out(3)", stagger: {
+		each: 0.05,
+		grid: "auto",
+		from: "center"
+	} }, "<")
+	.to(".slotweaponname", { opacity: showWeaponNames?1:0});
 
 	return true;
 }; // setup
@@ -342,8 +386,7 @@ function randomWeapon() {
     var currentObj, img, name, idx;
     var RNG;
     var allWeapons = getAllWeapons();
-    console.log(allWeapons);
-    document.getElementById("randomWeapon").innerHTML = "";
+    // console.log(allWeapons);
     if (document.getElementById("randomIgnore").checked === true) {
         document.getElementById("randomObey").disabled = true;
         Math.seedrandom();
@@ -352,22 +395,120 @@ function randomWeapon() {
         document.getElementById("randomIgnore").disabled = true;
         idx = Math.floor(allWeapons.length * Math.random()); //should preserve seed order
     }
-    console.log(idx);
+    // console.log(idx);
     if (idx == allWeapons.length) { idx--; } //fix a miracle
     currentObj = allWeapons[idx];
-    console.log("currentobj is :" + currentObj);
+    // console.log("currentobj is :" + currentObj);
     img = currentObj.image;
     name = currentObj.name;
-    $('#randomWeapon').append("<td><image width=70px height=70px src=" + img + "></td>");
-    $('#randomWeapon').append("<td><strong style=\"color: orange\">Supplied Weapon</strong><br><strong style=\"color: white\">You have been loaned the " + name + "!</strong></td>");
-    document.getElementById("randomWeapon").style = "background-color: grey";
+	setRandomWeapon(name, img);
 }
 
-function reseedPage() {
-	var qSeed = "?seed=" + Math.ceil(999999 * Math.random());
-	window.location = qSeed;
-	return false;
+
+function setRandomWeapon(name, img){
+	let randomizerWasHidden = !showRandomizer;
+	let tl = gsap.timeline();
+
+	if (name == undefined){
+		name = "Unknown weapon…";
+		img = "../img/unknownsplat1.png";
+		middletext = "You'll be given an";
+	} else {
+		name = name + "!";
+		middletext = "You've been handed the";
+	}
+
+	tl.to("#randomweapon_weapon, #randomweapon_bottomtext",
+	  { opacity: 0, onComplete: () => {
+			document.querySelector("#randomweapon_weapon img").src = img;
+			document.querySelector("#randomweapon_bottomtext").innerHTML = name;
+			if (randomizerWasHidden){
+				showHideRandomizer(true);
+			}
+	    }
+	  })
+
+	.set("#randomweapon_weapon", { scale: 0.5 })
+	.to("#randomweapon_weapon", { scale: 1, opacity: 1, ease: "elastic.out(1, 0.3)", duration: 1.5})
+	.to("#randomweapon_bottomtext", {opacity: 1}, "<");
+	document.querySelector("#randomweapon_middletext").innerHTML = middletext;
+
+	if (randomizerWasHidden){
+		setTimeout(() => { showHideRandomizer(false)}, 10000);
+	}
+
 }
+
+// function reseedPage() {
+// 	var qSeed = "?seed=" + Math.ceil(999999 * Math.random());
+// 	window.location = qSeed;
+// 	return false;
+// }
+
+function setParam(paramName, val){
+	const params = new URLSearchParams(location.search);
+	params.set(paramName, val);
+	window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
+}
+
+function reseedPage(){
+	const newSeed = Math.ceil(999999 * Math.random())
+	setParam("seed", newSeed)
+
+	return newSeed;
+}
+
+function clearSlot(slot){
+	slot.querySelectorAll("div").forEach(e => { e.innerHTML = "?" });
+}
+
+function clearBoard(){
+	gsap.timeline()
+	.to(".slotweaponname", { opacity: 0})
+	.to(".slotcontent", { opacity: 0, duration: 0.5, scale: 0, stagger: { each: 0.05, grid: "auto", from: "center"},
+	onComplete: function() {
+		document.querySelectorAll(".redsquare, .greensquare").forEach(e => {
+			e.classList.remove("redsquare");
+			e.classList.remove("greensquare");
+		})
+		this.targets().forEach(e => clearSlot(e));
+		srl.bingo(weaponMap, 5, true);
+	}})
+}
+
+function toggleWeaponNames(){
+	showWeaponNames = !showWeaponNames;
+	gsap.to(".slotweaponname", {opacity: showWeaponNames ? 1 : 0});
+}
+
+function showHideRandomizer(show){
+	showRandomizer = show;
+	if (show){
+		gsap.timeline().set("#randomweapon", {opacity: 0, scale: 0.7})
+		.to("#randomweapon", {opacity: 1, duration: 0.4})
+		.to("#randomweapon", {scale: 1.0, duration: 0.8, ease: "elastic.out(1, 0.3)"}, '<');
+	} else {
+		gsap.to("#randomweapon", {opacity: 0});
+	}
+}
+
+function toggleRandomizer(){
+	showHideRandomizer(!showRandomizer);
+}
+
+function toggleBoard(){
+	showBoard = !showBoard;
+	gsap.to("#results", {opacity: showBoard? 1 : 0});
+}
+
+function resetUnknown(){
+	setRandomWeapon();
+}
+
+function dragEnd(e){
+	setParam(e, `${this.x},${this.y}`);
+}
+
 
 // Backwards Compatability
 var srl = { bingo:bingo };

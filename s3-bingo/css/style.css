@@ -1,4 +1,11 @@
-html, body {
+@font-face {
+	font-family: 'Splatoon2';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Splatoon2'), url(../font/Splatfont2.ttf) format('woff');
+}
+
+body {
 	background:#111;
 	color:#bec7d2;
 	font-family:Helvetica, Arial, sans-serif;
@@ -9,6 +16,7 @@ html, body {
 	margin:0;
 	padding:0;
 	text-shadow:1px 1px 0 rgba(0,0,0,0.3);
+	font-family: "Splatoon2";
 }
 
 header {
@@ -121,6 +129,7 @@ ul li {
 	-moz-user-select:none;
 	-o-user-select:none;
 	-webkit-user-select:none;
+	user-select: none;
 }
 
 table {
@@ -221,11 +230,12 @@ th {
 	-moz-user-select:none;
 	-o-user-select:none;
 	-webkit-user-select:none;
+	user-select: none;
 	margin-top:16px;
 }
 
 #bingoPage #bingo .rowcol {
-	background:#000811;
+	/* background:#000811; */
 	border:1px #0a245a solid;
 	color:#3c70df;
 	font-size:75%;
@@ -238,7 +248,7 @@ th {
 }
 
 #bingoPage #bingo tr:first-child td,#bingoPage #bingo tr:last-child td {
-	background:#000811;
+	/* background:#000811; */
 	border:1px #0a245a solid;
 	color:#3c70df;
 	font-size:75%;
@@ -315,6 +325,7 @@ th {
 
 #ajaxspin {
 	-moz-animation:spin 1s linear infinite;
+	animation:spin 1s linear infinite;
 	-webkit-animation:spin 1s linear infinite;
 	border-color:#212121 #865934 #858b93 #c6b561;
 	border-radius:40px;
@@ -328,6 +339,7 @@ th {
 #ajaxloading {
 	-moz-animation:bounce 1.5s linear infinite;
 	-webkit-animation:bounce 1.5s linear infinite;
+	animation:bounce 1.5s linear infinite;
 	color:gray;
 	font-size:85%;
 	font-weight:700;
@@ -347,11 +359,95 @@ th {
 }
 
 .container {
-	margin:0 auto;
-	overflow:auto;
-	padding:8px 0 8px 16px;
-	width:976px;
+	margin:0px;
+	width:100%;
+	height: 100%;
 }
+
+.splat3_dialog {
+	background-image: url("../img/splat3-dialog.png");
+	background-size: cover;
+	font-family: "Splatoon2";
+
+	width: 600px;
+	height: 300px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+#randomweapon_ctr {
+	display: grid;
+	grid-template-columns: 40% auto;
+	grid-template-rows: 33% 33% 33%;
+
+	text-align: left;
+	font-size: 32px;
+	align-items: center;
+	width: 100%;
+	height: 55%;
+	text-shadow: #000 2px 2px;
+}
+
+#randomweapon_toptext {
+	grid-column: 2 / 3;
+	grid-row: 1 / 2;
+
+	color: rgb(237, 73, 8);
+	align-items: baseline;
+	text-transform: uppercase;
+}
+
+#randomweapon_middletext {
+	grid-column: 2 / 3;
+	grid-row: 2 / 3;
+	font-size: 90%;
+}
+
+#randomweapon_bottomtext {
+	grid-column: 2 / 3;
+	grid-row: 3 / 4;
+	font-size: 120%
+}
+
+#randomweapon_weapon {
+	grid-column: 1 / 2;
+	grid-row: 1 / 4;
+	display: flex;
+	flex-direction: row;
+	justify-content: right;
+}
+
+#randomweapon_weapon img {
+	width: 85%;
+}
+
+.slotcontent {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+}
+
+.slotweaponimage {
+	width: 100%;
+	height: 100%;
+}
+
+.slotweaponimage img {
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	height: 100px;
+	width: 100px;
+}
+
+#seedinfo {
+	font-family: sans-serif;
+}
+
 
 .red	{ color:#fa5050; }
 .green	{ color:#52d64f; }
