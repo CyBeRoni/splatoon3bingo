@@ -5,10 +5,14 @@
 	src: local('Splatoon2'), url(../font/Splatfont2.ttf) format('woff');
 }
 
+body {
+    background-color: #3A393A;
+    color: white;
+}
 
 div.buttonContainer {
     margin: 5px;
-    background: #ccc;
+    background: #5A595A;
     width: 200px;
 
     font-family: Splatoon2;
