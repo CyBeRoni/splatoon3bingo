@@ -55,7 +55,7 @@ var bingo = function(weaponMap, size, reseed) {
 	var SEED = getParam( 'seed' );
 	var MODE = getParam( 'mode' );
 
-	if(SEED == "" || reseed) SEED = reseedPage();
+	if(SEED == undefined || reseed) SEED = reseedPage();
 	var cardtype = "Normal";
 
 	if (typeof size == 'undefined') size = 5;
