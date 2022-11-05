@@ -34,7 +34,7 @@ var splatlingList = [
 ];
 
 var chargerList = [
-    {name: "Bamboozler 14 Mk", image: "../weapons/005.png", types: "Charger"},
+    {name: "Bamboozler 14 Mk I", image: "../weapons/005.png", types: "Charger"},
     {name: "Squiffer", image: "../weapons/010.png", types: "Charger"},
     {name: "E-liter 4K", image: "../weapons/015.png", types: "Charger"},
     {name: "E-liter 4K Scope", image: "../weapons/016.png", types: "Charger"},
