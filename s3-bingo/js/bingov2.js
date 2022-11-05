@@ -2,6 +2,7 @@ var bingoBoard = [];
 var showWeaponNames = false;
 var showRandomizer = true;
 var showBoard = true;
+var currentRandomWeapon = undefined;
 
 function getParam(name){
 	const urlParams = new URLSearchParams(window.location.search);
@@ -42,7 +43,7 @@ var bingo = function(weaponMap, size, reseed) {
 	var SEED = getParam( 'seed' );
 	var MODE = getParam( 'mode' );
 
-	if(SEED == undefined || reseed) SEED = reseedPage();
+	if(SEED == undefined  || SEED == "" || reseed) SEED = reseedPage();
 	var cardtype = "Normal";
 
 	if (typeof size == 'undefined') size = 5;
@@ -323,6 +324,7 @@ var bingo = function(weaponMap, size, reseed) {
 	.set(".slotcontent", {onComplete: function(){
 		this.targets().forEach(e => {
 			let i = e.dataset.index;
+			e.dataset.weapon = bingoBoard[i].name;
 			e.querySelector(".slotweaponimage").innerHTML = `<img src=${bingoBoard[i].image}>`;
 			e.querySelector(".slotweaponname").innerHTML = bingoBoard[i].name;
 		});
@@ -388,6 +390,7 @@ function randomWeapon() {
     // console.log("currentobj is :" + currentObj);
     img = currentObj.image;
     name = currentObj.name;
+	currentRandomWeapon = currentObj.name;
 	setRandomWeapon(name, img);
 }
 
@@ -496,6 +499,30 @@ function dragEnd(e){
 	setParam(e, `${this.x},${this.y}`);
 }
 
+function findTileForWeapon(weapon){
+	elems = Array.from(document.querySelectorAll(".slotcontent"));
+
+	return elems.find(e => { return e.dataset.weapon == weapon});
+}
+
+function win(){
+	elem = findTileForWeapon(currentRandomWeapon);
+	if (! elem)
+		return;
+
+	elem.parentElement.classList.remove("redsquare");
+	elem.parentElement.classList.add("greensquare");
+}
+
+function loss(){
+	elem = findTileForWeapon(currentRandomWeapon);
+
+	if (! elem)
+		return;
+
+	if (! elem.parentElement.classList.contains("greensquare"))
+		elem.parentElement.classList.add("redsquare");
+}
 
 // Backwards Compatability
 var srl = { bingo:bingo };
