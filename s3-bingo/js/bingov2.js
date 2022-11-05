@@ -9,19 +9,6 @@ function getParam(name){
 }
 
 function setupBoard(){
-	$('.popout').click(function() {
-	    refreshBoard(false);
-		var mode = null;
-		var line = $(this).attr('id');
-		var name = $(this).html();
-		var items = [];
-		var cells = $('#bingo .'+ line);
-		for (var i = 0; i < 5; i++) {
-		  items.push( encodeURIComponent($(cells[i]).html()) );
-		}
-        window.open('popout.html#'+ name +'='+ items.join(';;;'),"_blank","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=100, height=600");
-	});
-
 	$("#bingo tr td:not(.popout), #selected td").toggle(
 		function () { $(this).addClass("greensquare"); },
 		function () { $(this).addClass("redsquare").removeClass("greensquare"); },
