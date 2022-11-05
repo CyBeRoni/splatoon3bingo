@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <script type="text/javascript" src="../js/lsbridge.js"></script>
+        <link rel="stylesheet" href="../css/dock.css"/>
+
+    </head>
+    <body>
+        <div class="buttonContainer">
+            <div>Bingo Board</div>
+            <div>
+                <button class="button-17" data-msg="reroll">Reroll</button>
+            </div>
+        </div>
+        <div class="buttonContainer">
+            <div>Visibility</div>
+            <div>
+                <button class="button-17" data-msg="toggleRandomizer">Toggle Randomizer</button>
+                <button class="button-17" data-msg="toggleBoard">Toggle Bingo Board</button>
+            </div>
+        </div>
+        <div class="buttonContainer">
+            <div>Random Weapon</div>
+            <div>
+                <button class="button-17" data-msg="randomWeapon">Randomise Weapon</button>
+                <button class="button-17" data-msg="resetUnknown">Unknown Weapon</button>
+            </div>
+        </div>
+    </div>
+    </body>
+
+    <script>
+
+        document.querySelectorAll("button").forEach(e => {
+            console.log("add")
+            e.addEventListener('click', (event) => {
+                console.log(event.target);
+                lsbridge.send("bingo", { function: event.target.dataset.msg })
+            })
+        });
+        </script>
+</html>
