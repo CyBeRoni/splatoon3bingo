@@ -2,7 +2,7 @@
 	font-family: 'Splatoon2';
 	font-style: normal;
 	font-weight: 400;
-	src: local('Splatoon2'), url(../font/Splatfont2.ttf) format('woff');
+	src: local('Splatoon2'), url(../font/Splatfont2.ttf) format('ttf');
 }
 
 body {
