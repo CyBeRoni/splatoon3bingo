@@ -4,12 +4,15 @@ var showRandomizer = true;
 var showBoard = true;
 var currentRandomWeapon = undefined;
 
+const bc = new BroadcastChannel("s3-bingo");
+
 function getParam(name){
 	const urlParams = new URLSearchParams(window.location.search);
 	return urlParams.get(name);
 }
 
 function setupBoard(){
+
 	$("#bingo tr td:not(.popout), #selected td").toggle(
 		function () { $(this).addClass("greensquare"); },
 		function () { $(this).addClass("redsquare").removeClass("greensquare"); },
@@ -382,6 +385,33 @@ function loss(){
 	if (! elem.parentElement.classList.contains("greensquare"))
 		elem.parentElement.classList.add("redsquare");
 }
+
+bc.onmessage = (event) => {
+	switch(event.data.function){
+		case 'clearBoard':
+			clearBoard();
+			break;
+		case 'toggleRandomizer':
+			toggleRandomizer();
+			break;
+		case 'toggleBoard':
+			toggleBoard();
+			break;
+		case 'randomWeapon':
+			randomWeapon();
+			break;
+		case 'resetUnknown':
+			resetUnknown();
+			break;
+		case 'win':
+			win();
+			break;
+		case 'loss':
+			loss();
+			break;
+	}
+};
+
 
 // Backwards Compatability
 var srl = { bingo:bingo };

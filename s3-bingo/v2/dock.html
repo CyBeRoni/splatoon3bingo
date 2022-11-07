@@ -1,8 +1,6 @@
 <html>
     <head>
-        <script type="text/javascript" src="../js/lsbridge.js"></script>
         <link rel="stylesheet" href="../css/dock.css"/>
-
     </head>
     <body>
         <div class="buttonContainer">
@@ -31,12 +29,12 @@
     </body>
 
     <script>
+        const bc = new BroadcastChannel("s3-bingo");
 
         document.querySelectorAll("button").forEach(e => {
             console.log("add")
             e.addEventListener('click', (event) => {
-                console.log(event.target);
-                lsbridge.send("bingo", { function: event.target.dataset.msg })
+                bc.postMessage({ function: event.target.dataset.msg });
             })
         });
         </script>
