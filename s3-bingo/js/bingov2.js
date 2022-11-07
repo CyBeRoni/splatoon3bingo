@@ -309,20 +309,17 @@ function reseedPage(){
 	return newSeed;
 }
 
-function clearSlot(slot){
-	slot.querySelectorAll("div").forEach(e => { e.innerHTML = "?" });
-}
-
 function clearBoard(){
+
+	document.querySelectorAll(".redsquare, .greensquare").forEach(e => {
+		e.classList.remove("redsquare");
+		e.classList.remove("greensquare");
+	})
+
 	gsap.timeline()
 	.to(".slotweaponname", { opacity: 0, duration: showWeaponNames ? 0.25 : 0})
 	.to(".slotcontent", { opacity: 0, duration: 0.5, scale: 0, stagger: { each: 0.05, grid: "auto", from: "center"},
 		onComplete: function() {
-			document.querySelectorAll(".redsquare, .greensquare").forEach(e => {
-				e.classList.remove("redsquare");
-				e.classList.remove("greensquare");
-			})
-			this.targets().forEach(e => clearSlot(e));
 			srl.bingo(weaponMap, 5, true);
 		}
 	});
