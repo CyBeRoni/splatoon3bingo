@@ -21,6 +21,10 @@ fieldset {
     width: 230px;
 }
 
+legend {
+    text-align: left;
+}
+
 .fullwidth {
     width: 95%;
 }

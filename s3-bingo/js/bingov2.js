@@ -1,8 +1,8 @@
 var bingoBoard = [];
-var showWeaponNames = false;
-var showRandomizer = true;
-var showBoard = true;
+var weaponsRolled = [];
 var currentRandomWeapon = undefined;
+var boardRNG;
+var weaponRNG;
 
 const bc = new BroadcastChannel("s3-bingo");
 
@@ -38,22 +38,33 @@ function setupBoard(){
 	}
 
 	// if the OBS dock is listening, send state.
-	checkVisibility();
+	let showBoard = window.localStorage.showBoard;
+	let showRandomizer = window.localStorage.showRandomizer;
+	showHideBoard(showBoard === "true" || showBoard == undefined);
+	showHideRandomizer(showRandomizer === "true" || showRandomizer == undefined);
+
+	weaponRNG = new Math.seedrandom();
+
+	// If we're in a browser rather than OBS, show the dock panel for controls.
+	if (window.obsstudio == undefined){
+		dock = document.createElement("iframe");
+		dock.classList.add("dock")
+
+		dock.src = "dock.html";
+		document.body.appendChild(dock);
+	}
 
 }
 
-var bingo = function(weaponMap, size, reseed) {
+var bingo = function(weaponMap, size, reseed, seed) {
 
 	var SEED = getParam( 'seed' );
-	var MODE = getParam( 'mode' );
 
-	if(SEED == undefined || SEED == "" || reseed) SEED = reseedPage();
+	if(SEED == undefined || SEED == "" || reseed) SEED = reseedPage(seed);
 
-	if (typeof size == 'undefined') size = 5;
+	boardRNG = new Math.seedrandom(parseInt(SEED)); //sets up the RNG
 
-	Math.seedrandom(SEED); //sets up the RNG
-
-	document.querySelector("#seedinfo").innerHTML = `Seed: ${SEED}`;
+	// document.querySelector("#seedinfo").innerHTML = `Seed: ${SEED}`;
 
 	$("#row1").hover(function() { $(".row1").addClass("hover"); }, function() {	$(".row1").removeClass("hover"); });
 	$("#row2").hover(function() { $(".row2").addClass("hover"); }, function() {	$(".row2").removeClass("hover"); });
@@ -122,39 +133,46 @@ var bingo = function(weaponMap, size, reseed) {
 
     function getArrayOfWeaponTypesForBoard() {
         var weaponTypes = Array.from(weaponMap.keys());
+        var allWeaponsArray = [...weaponMap.values()].flat();
         var currentWeaponType;
         var mapOfWeaponTypesToFrequencyInBoard = new Map();
-        var weaponTypesOnThisBoard = [];
+        var weaponTypesOnThisBoard = new Array(25);
         var retries;
         var foundAcceptableWeaponType;
         var thisBoardsWeapons = [];
         for (i=0; i<25; i++) {
-            var tempWeaponTypes = weaponTypes.map((x) => x);
             foundAcceptableWeaponType = false;
-            retries = 15;
+            retries = 200;
             do {
-                var RNG = Math.floor(tempWeaponTypes.length * Math.random());
-                if (RNG == tempWeaponTypes.length) {
+                var RNG = Math.floor(allWeaponsArray.length * boardRNG());
+                if (RNG == allWeaponsArray.length) {
                     RNG--;
                 }
-                currentWeaponType = tempWeaponTypes[RNG];
+                currentWeaponType = allWeaponsArray[RNG].types;
                 if (currentWeaponType == undefined) {
                     console.log("Error weapon type undefined");
                 }
                 if (!mapOfWeaponTypesToFrequencyInBoard.has(currentWeaponType)
                     || mapOfWeaponTypesToFrequencyInBoard.get(currentWeaponType) < weaponMap.get(currentWeaponType).length) {
-                    if (avoidsDuplicatingTypesInRows(weaponTypesOnThisBoard, i, currentWeaponType)) {
-                        weaponTypesOnThisBoard.push(currentWeaponType);
+                    var bingoBoardIndex = i;
+                    if (i == 0) {
+                        bingoBoardIndex = 12; //The center square is always chosen first to prevent weird biasing issues
+                    }
+                    if (i == 12) {
+                        bingoBoardIndex = 0; //Fill in the top left most square when we would otherwise have filled the center
+                    }
+                    if (avoidsDuplicatingTypesInRows(weaponTypesOnThisBoard, bingoBoardIndex, currentWeaponType)) {
+                        weaponTypesOnThisBoard[bingoBoardIndex] = currentWeaponType;
                         mapOfWeaponTypesToFrequencyInBoard.set(currentWeaponType, mapOfWeaponTypesToFrequencyInBoard.get(currentWeaponType) + 1 || 1);
                         foundAcceptableWeaponType = true;
                     }
                 }
-                tempWeaponTypes = tempWeaponTypes.filter(function(value) {
-                    return value != currentWeaponType;
-                });
                 retries -=1;
-            } while (!foundAcceptableWeaponType && tempWeaponTypes.length > 0);
+            } while (!foundAcceptableWeaponType && retries >= 0);
         }
+//        for (let [key, value] of mapOfWeaponTypesToFrequencyInBoard) {
+//            console.log(key + ": " + value);
+//        }
         if (weaponTypesOnThisBoard.length < 25) {
             console.log("error unable to generate card");
             //break;
@@ -166,15 +184,15 @@ var bingo = function(weaponMap, size, reseed) {
 	    var weaponTypesOnThisBoard;
 	    do {
 	        weaponTypesOnThisBoard = getArrayOfWeaponTypesForBoard();
-	    } while (weaponTypesOnThisBoard.length < 25);
+	    } while (weaponTypesOnThisBoard.includes(undefined));
         var thisBoardsWeapons = [];
         for (i=0; i<25; i++) {
             foundUnusedElement = false;
             retries = 50;
             do {
-                var currentWeaponType = weaponTypesOnThisBoard[i];
+                var currentWeaponType = weaponTypesOnThisBoard.at(i);
                 var currentWeaponTypeList = weaponMap.get(currentWeaponType);
-                var RNG = Math.floor(currentWeaponTypeList.length * Math.random());
+                var RNG = Math.floor(currentWeaponTypeList.length * boardRNG());
                 if (RNG == currentWeaponTypeList.length) {
                     RNG--;
                 }
@@ -204,6 +222,8 @@ var bingo = function(weaponMap, size, reseed) {
 
         bingoBoard[i+1] = { name: currentObj.name, image: currentObj.image };
     }
+
+	let showWeaponNames = window.localStorage.showWeaponNames === "true";
 
 	gsap.timeline()
 	.set(".slotcontent", {onComplete: function(){
@@ -241,7 +261,20 @@ function getAllWeapons() {
             result.push(value[val]);
         }
     }
-    return result;
+
+	// Crudely filter for weapons that are on the board
+	if (window.localStorage.boardWeaponsOnly === "true"){
+		result = result.filter(e => {
+			return bingoBoard.find(el => { return el != undefined && el.name === e.name});
+		});
+	}
+
+	// Crudely filter for duplicate weapons
+	if (window.localStorage.noDuplicateWeapons === "true"){
+		result = result.filter(el => {return el != undefined && !weaponsRolled.includes(el)});
+	}
+
+	return result;
 }
 
 function randomWeapon() {
@@ -249,57 +282,80 @@ function randomWeapon() {
     var RNG;
     var allWeapons = getAllWeapons();
 
-	if (document.getElementById("randomIgnore").checked === true) {
-        document.getElementById("randomObey").disabled = true;
-        Math.seedrandom();
-        idx = Math.floor(allWeapons.length * Math.random()); //should be total chaos in random assignment
-    } else {
-        document.getElementById("randomIgnore").disabled = true;
-        idx = Math.floor(allWeapons.length * Math.random()); //should preserve seed order
-    }
+	if (allWeapons.length > 0){
+		idx = Math.floor(allWeapons.length * weaponRNG());
 
-	if (idx == allWeapons.length) { idx--; } //fix a miracle
-    currentObj = allWeapons[idx];
+		if (idx == allWeapons.length) { idx--; } //fix a miracle
+		currentObj = allWeapons[idx];
 
-	img = currentObj.image;
-    name = currentObj.name;
-	currentRandomWeapon = currentObj.name;
-	setRandomWeapon(name, img);
+		img = currentObj.image;
+		name = currentObj.name;
+		currentRandomWeapon = currentObj.name;
+		setRandomWeapon(name, img);
+		weaponsRolled.push(currentObj);
+	} else {
+		setRandomWeapon("sheldon");
+	}
 }
 
 
+function resetRandomizer(cb){
+	img = document.querySelector("#randomweapon_weapon img");
+	img.src = "../img/unknownsplat1.png"
+	if (cb !== undefined)
+		onImageLoad(img, cb);
+	document.querySelector("#randomweapon_bottomtext").innerHTML = "Unknown weapon…";
+	document.querySelector("#randomweapon_middletext").innerHTML = "You'll be given an";
+}
+
 function setRandomWeapon(name, img){
-	let randomizerWasHidden = !showRandomizer;
+	let randomizerWasHidden = window.localStorage.showRandomizer !== "true";
 	let tl = gsap.timeline();
+	let showIfHidden = true;
+	let toptext = "Supplied Weapon"
 
 	if (name == undefined){
+		showIfHidden = false;
+		toptext = "???"
 		name = "Unknown weapon…";
 		img = "../img/unknownsplat1.png";
 		middletext = "You'll be given an";
+	} else if (name == "sheldon"){
+		img = "../img/sheldon.png";
+		name = "Empty Hands!";
+		toptext = "Out of stock"
+		middletext = "You're left with";
 	} else {
 		name = name + "!";
 		middletext = "You've been handed the";
 	}
 
-	tl.to("#randomweapon_weapon, #randomweapon_bottomtext",
-	  { opacity: 0, onComplete: () => {
-			document.querySelector("#randomweapon_weapon img").src = img;
-			document.querySelector("#randomweapon_bottomtext").innerHTML = name;
-			if (randomizerWasHidden){
-				showHideRandomizer(true);
-			}
-	    }
-	  })
+	if (randomizerWasHidden && showIfHidden){
+		resetRandomizer(() => {
+			showHideRandomizer(true);
+			tl.delay(1);
+			setTimeout(() => { showHideRandomizer(false)}, 10000);
+		});
 
-	.set("#randomweapon_weapon", { scale: 0.5 })
-	.to("#randomweapon_weapon", { scale: 1, opacity: 1, ease: "elastic.out(1, 0.3)", duration: 1.5})
-	.to("#randomweapon_bottomtext", {opacity: 1}, "<");
-	document.querySelector("#randomweapon_middletext").innerHTML = middletext;
-
-	if (randomizerWasHidden){
-		setTimeout(() => { showHideRandomizer(false)}, 10000);
 	}
 
+	tl.to("#randomweapon_weapon, #randomweapon_bottomtext",
+	  { opacity: 0, onComplete: () => {
+			tl.pause();
+			document.querySelector("#randomweapon_weapon img").src = img;
+			onImageLoad(document.querySelector("#randomweapon_weapon img"), () => {
+				tl.resume();
+			});
+			document.querySelector("#randomweapon_bottomtext").innerHTML = name;
+			document.querySelector("#randomweapon_middletext").innerHTML = middletext;
+			document.querySelector("#randomweapon_toptext").innerHTML = toptext;
+
+	    }
+	  })
+	.set("#randomweapon_weapon", { scale: 0.5, rotation: 0 })
+	.to("#randomweapon_weapon", { scale: 1, ease: "elastic.out(1, 0.3)", duration: 1.5})
+	.to("#randomweapon_weapon", {opacity: 1, rotation: 0}, "<")
+	.to("#randomweapon_bottomtext", {opacity: 1}, "<");
 }
 
 function setParam(paramName, val){
@@ -308,36 +364,59 @@ function setParam(paramName, val){
 	window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
 }
 
-function reseedPage(){
-	const newSeed = Math.ceil(999999 * Math.random())
+
+function reseedBoardWithSeed(seed){
+	clearBoard(seed);
+}
+
+function reseedPage(newSeed){
+	if (newSeed == undefined)
+		newSeed = Math.ceil(999999 * Math.random())
 	setParam("seed", newSeed)
+	window.localStorage.boardSeed = newSeed;
 
 	return newSeed;
 }
 
-function clearBoard(){
+function setWeaponSeed(newSeed){
+	if (newSeed != "")
+		weaponRNG = new Math.seedrandom(parseInt(newSeed));
+	else
+		weaponRNG = new Math.seedrandom();
+}
+
+
+function clearBoard(seed){
 
 	document.querySelectorAll(".redsquare, .greensquare").forEach(e => {
 		e.classList.remove("redsquare");
 		e.classList.remove("greensquare");
 	})
 
+	let showWeaponNames = window.localStorage.showWeaponNames === "true";
+
 	gsap.timeline()
 	.to(".slotweaponname", { opacity: 0, duration: showWeaponNames ? 0.25 : 0})
 	.to(".slotcontent", { opacity: 0, duration: 0.5, scale: 0, stagger: { each: 0.05, grid: "auto", from: "center"},
 		onComplete: function() {
-			srl.bingo(weaponMap, 5, true);
+			srl.bingo(weaponMap, 5, true, seed);
 		}
 	});
 }
 
+function showHideWeaponNames(show){
+	console.log(show);
+	gsap.to(".slotweaponname", {opacity: show ? 1 : 0});
+}
+
 function toggleWeaponNames(){
-	showWeaponNames = !showWeaponNames;
-	gsap.to(".slotweaponname", {opacity: showWeaponNames ? 1 : 0});
+	let showWeaponNames = window.localStorage.showWeaponNames === "true";
+	window.localStorage.showWeaponNames = !showWeaponNames;
+
+	showHideWeaponNames(!showWeaponNames);
 }
 
 function showHideRandomizer(show){
-	showRandomizer = show;
 	if (show){
 		gsap.timeline().set("#randomweapon", {opacity: 0, scale: 0.7})
 		.to("#randomweapon", {opacity: 1, duration: 0.4})
@@ -345,27 +424,40 @@ function showHideRandomizer(show){
 	} else {
 		gsap.to("#randomweapon", {opacity: 0});
 	}
-
-	bc.postMessage({element: "randomizer", visible: show});
 }
 
 function toggleRandomizer(){
+	let showRandomizer = window.localStorage.showRandomizer === 'true'
+
+	window.localStorage.showRandomizer = !showRandomizer;
+
 	showHideRandomizer(!showRandomizer);
 }
 
 function showHideBoard(show){
-	showBoard = show;
 	gsap.to("#results", {opacity: show? 1 : 0});
 
-	bc.postMessage({element: "board", visible: show});
+	if (window.localStorage.autoHideBoard === "true" && show){
+		setTimeout(() => {
+			// don't hide if the setting was disabled between the setTimeout() and now
+			if (window.localStorage.autoHideBoard === "true") {
+				showHideBoard(false);
+				window.localStorage.showBoard = false;
+			}
+		}, 20000)
+	}
+
 }
 
 function toggleBoard(){
+	let showBoard = window.localStorage.showBoard === 'true'
+
+	window.localStorage.showBoard = !showBoard;
 	showHideBoard(!showBoard);
 }
 
 function resetUnknown(){
-	setRandomWeapon();
+	resetRandomizer();
 }
 
 function dragEnd(e){
@@ -400,8 +492,8 @@ function loss(){
 // Sync the visibility state of the randomizer and bingo board with
 // the OBS dock
 function checkVisibility(){
-	bc.postMessage({element: "board", visible: showBoard});
-	bc.postMessage({element: "randomizer", visible: showRandomizer});
+	// bc.postMessage({element: "board", visible: showBoard});
+	//bc.postMessage({element: "randomizer", visible: showRandomizer});
 }
 
 bc.onmessage = (event) => {
@@ -410,10 +502,10 @@ bc.onmessage = (event) => {
 			clearBoard();
 			break;
 		case 'toggleRandomizer':
-			showHideRandomizer(event.data.arg);
+			toggleRandomizer();
 			break;
 		case 'toggleBoard':
-			showHideBoard(event.data.arg);
+			toggleBoard();
 			break;
 		case 'randomWeapon':
 			randomWeapon();
@@ -429,8 +521,45 @@ bc.onmessage = (event) => {
 			break;
 		case 'checkVisibility':
 			checkVisibility();
+			break;
+		case 'reseedBoardWithSeed':
+			reseedBoardWithSeed(event.data.arg);
+			break;
+		case 'setWeaponSeed':
+			setWeaponSeed(event.data.arg);
+			break;
+		case 'resetWeaponRolls':
+			weaponsRolled = [];
+			break;
 	}
-};
+}
+
+function setStorageCallback(key, cb){
+	window.addEventListener('storage', (e) => {
+		if (e.key === key)
+			cb(e);
+	})
+}
+
+setStorageCallback("showBoard", (e) => {
+	showHideBoard(e.newValue === "true");
+})
+
+setStorageCallback("showRandomizer", (e) => {
+	showHideRandomizer(e.newValue === "true");
+});
+
+setStorageCallback("showWeaponNames", (e) => {
+	showHideWeaponNames(e.newValue === "true");
+});
+
+function onImageLoad(elem, cb){
+    if (elem.complete){
+        cb();
+    } else {
+       elem.decode().then(cb);
+    }
+}
 
 
 // Backwards Compatability

@@ -5,6 +5,10 @@
 	src: local('Splatoon2'), url(../font/Splatfont2.ttf) format('ttf');
 }
 
+html {
+	height: 100%;
+}
+
 body {
 	background-color: rgb(24, 24, 24);
 	color:#bec7d2;
@@ -17,6 +21,14 @@ body {
 	padding:0;
 	text-shadow:1px 1px 0 rgba(0,0,0,0.3);
 	font-family: "Splatoon2";
+}
+
+iframe.dock {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+	height: 95%;
+	width: 250px;
 }
 
 #about_bingo {

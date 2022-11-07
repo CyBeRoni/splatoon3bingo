@@ -3,10 +3,20 @@
     <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/selekkt-skelet@latest/css/skelet.min.css">
         <link rel="stylesheet" href="../css/dock.css"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
 
     </head>
     <body class="dark-mode">
         <div class="container">
+            <fieldset>
+                <legend>Random Weapon</legend>
+                <div>
+                    <button class="button fullwidth" data-msg="randomWeapon">New Weapon</button>
+                    <!-- <button class="button fullwidth" data-msg="resetUnknown">Unknown Weapon</button><br/> -->
+                    <button class="button halfwidth is-green" data-msg="win">Win</button>
+                    <button class="button halfwidth is-red" data-msg="loss">Loss</button>
+                </div>
+            </fieldset>
             <fieldset>
                 <legend>Bingo Board</legend>
                 <div>
@@ -16,17 +26,25 @@
             <fieldset>
                 <legend>Visibility</legend>
                 <div class="subcontainer">
-                    <input id="s-tb" type="checkbox" class="switch" data-msg="toggleBoard"/><label for="s-tb">Show Bingo Board</label>
-                    <input id="s-tr" type="checkbox" class="switch" data-msg="toggleRandomizer"><label for="s-tb">Show Random Weapon</label>
+                    <input id="s-tb" type="checkbox" class="switch storetoggle" data-msg="showBoard"/><label for="s-tb">Show Bingo Board</label>
+                    <input id="s-tr" type="checkbox" class="switch storetoggle" data-msg="showRandomizer"><label for="s-tb">Show Random Weapon</label>
                 </div>
             </fieldset>
             <fieldset>
-                <legend>Random Weapon</legend>
-                <div>
-                    <button class="button fullwidth" data-msg="randomWeapon">Randomise Weapon</button>
-                    <button class="button fullwidth" data-msg="resetUnknown">Unknown Weapon</button><br/>
-                    <button class="button halfwidth is-green" data-msg="win">Win</button>
-                    <button class="button halfwidth is-red" data-msg="loss">Loss</button>
+                <legend>Board Settings</legend>
+                <div class="subcontainer">
+                    <input id="s-ahb" type="checkbox" class="switch storetoggle" data-msg="autoHideBoard"/><label for="s-ahb">Auto-hide Board (20s)</label>
+                    <input id="s-tr" type="checkbox" class="switch storetoggle" data-msg="showWeaponNames"><label for="s-tb">Show weapon names</label>
+                    <input id="t-bseed" type="text" style="width: 45%" class="storetext" data-msg="boardSeed" placeholder="seed"><label for="t-bseed"><button class="button is-outline" onclick="setBoardSeed()"><i class="bi bi-arrow-clockwise"></i></button>Seed</label>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Weapon Settings</legend>
+                <div class="subcontainer">
+                    <input id="s-bwo" type="checkbox" class="switch storetoggle" data-msg="boardWeaponsOnly"><label for="s-bwo">Board weapons only</label>
+                    <input id="s-ndw" type="checkbox" class="switch storetoggle" data-msg="noDuplicateWeapons"><label for="s-ndw">No duplicate weapons</label>
+                    <input id="t-wseed" type="text" style="width: 45%" class="storetext" data-msg="weaponSeed" placeholder="seed"><label for="t-wseed"><button class="button is-outline" onclick="setWeaponSeed()"><i class="bi bi-arrow-clockwise"></i></button>Seed</label>
+                    <button class="button fullwidth is-small is-outline" data-msg="resetWeaponRolls">Reset rolled weapons</button>
                 </div>
             </fieldset>
         </div>
@@ -35,6 +53,13 @@
 
     <script>
         const bc = new BroadcastChannel("s3-bingo");
+        const defaults = {
+            showBoard: true,
+            showRandomizer: true,
+            autoHideBoard: false,
+            showWeaponNames: false,
+            boardWeaponsOnly: false,
+        };
 
         document.querySelectorAll("button").forEach(e => {
             e.addEventListener('click', (event) => {
@@ -42,20 +67,59 @@
             })
         });
 
-        document.querySelectorAll(".switch").forEach(e => {
+        document.querySelectorAll(".sendclick").forEach(e => {
             e.addEventListener('click', (event) => {
                 bc.postMessage({function: event.target.dataset.msg, arg: event.target.checked})
             });
         });
 
-        bc.onmessage = (event) => {
-            if (event.data.element == "board"){
-                document.querySelector("#s-tb").checked = event.data.visible;
-            } else if (event.data.element == "randomizer"){
-                document.querySelector("#s-tr").checked = event.data.visible;
-            }
-        };
+        document.querySelectorAll(".storetoggle").forEach(e => {
+            e.addEventListener('click', (event) => {
+                window.localStorage.setItem(event.target.dataset.msg, event.target.checked);
+            });
+        });
 
-        bc.postMessage({function: "checkVisibility"})
-        </script>
+
+        function setStorageCallback(key, cb){
+            window.addEventListener('storage', e => {
+                if (e.key === key){
+                    cb(e);
+                }
+            })
+        }
+
+        document.querySelectorAll(".storetoggle").forEach(elem => {
+            let key = elem.dataset.msg;
+            let item = window.localStorage.getItem(key);
+            elem.checked = item === "true" || (defaults[key] === true && item == undefined);
+
+            setStorageCallback(elem.dataset.msg, (event) => {
+                elem.checked = event.newValue === "true";
+            });
+        });
+
+        document.querySelectorAll(".storetext").forEach(elem => {
+            let key = elem.dataset.msg;
+            let item = window.localStorage.getItem(key);
+
+            elem.value = item;
+            setStorageCallback(elem.dataset.msg, (event) => {
+                elem.value = event.newValue;
+            });
+        });
+
+
+        function setBoardSeed(){
+            let boardSeed = document.querySelector("#t-bseed").value;
+
+            bc.postMessage({function: "reseedBoardWithSeed", arg: boardSeed});
+        }
+
+        function setWeaponSeed(){
+            let weaponSeed = document.querySelector("#t-wseed").value;
+
+            bc.postMessage({function: "setWeaponSeed", arg: weaponSeed});
+        }
+
+    </script>
 </html>

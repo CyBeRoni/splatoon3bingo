@@ -3,25 +3,39 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Splatoon 3 Weapons Bingo</title>
+    <title>Splatoon 3 Streamer Bingo</title>
 </head>
 <body>
-    <div style="width: 600px;">
-    <h1>Splatoon 3 Weapons Bingo</h1>
-    <h2>Marco's Stream Version</h2>
-    <p>This Weapons Bingo Card generator is based heavily on that by Go1den, but modified for visuals.</p>
-    <p>To use, create an OBS Browser source (minimum size: 1920x1080) and enter the URL. If custom positioning
-         is desired, do this in a browser and copy the resulting URL after, as the Browser Source will not save this between launches of OBS.
-         Crop out the settings area in OBS. Right-click and choose "interact" to be able to press the buttons.</p>
-    <p>Tips:</p>
-    <ul>
-        <li>Making the browser source 2300 pixels wide allows you to position the settings area off-screen</li>
-        <li>If you keep the "seed" parameter in the URL, the board will start with the same contents every time. Removing it will let OBS generate a new board every time you launch it.</li>
-        <li>If you hide the weapon randomizer and click either of the randomizers's buttons, it will show for 10 seconds and then hide again.</li>
-        <li>To avoid having to use "interact", there's an OBS dock you can add as well.</li>
-        </ul>
+    <div style="width: 600px; font-family: sans-serif; text-align: justify;">
+    <h1>Splatoon 3 Streamer Bingo</h1>
+    <img width=600 src="img/screenshot.png"/>
+    <p>This Weapons Bingo Card generator is based on the <a href="https://go1den.github.io/s3-bingo">original by Go1den</a>, but heavily modified to be more usable in a streaming context</p>
+
     <h2><a href="v2/index.html">Click here for the Bingo Card</a></h2>
     <h2><a href="v2/dock.html">Click here for the OBS Dock to control it</a></h2>
+
+    <h2>Instructions</h2>
+    <h3>Browser Source</h3>
+    <p>Add the <a href="v2/index.html">Bingo Card link</a> as a Browser Source in your OBS scene, and set the size to 1920x1080 pixels.</p><p>This is what shows the actual on-screen content. If your OBS canvas is smaller than 1920x1080, it's best to still make the Browser Source that size and resize it as a whole.</p>
+    <p>The board and weapon randomizer are set-up in reasonable places by default but if you need to move them, you can do so by right-clicking the source and choosing "Interact", after which a window will pop up that lets you move the items around the canvas.</p>
+    <h3>Control Dock</h3>
+    <p>To control the browser source you need a custom dock. In the Docks menu, choose "Custom Browser Docks" and in the resulting window add the <a href="v2/dock.html">Dock link</a> and give it a name.</p>
+    <p><b>Note:</b> because of browser security restrictions, you <em>must</em> use the dock from within OBS. Running it from a separate browser will not work.</p>
+    <h3>Usage</h3>
+    <p>Click "New Weapon" to get a random weapon. The Win/Loss buttons mark that weapon as green or red on the board.</p>
+    <p>Click the yellow "Reroll" button to re-roll your bingo board. This generates a new random seed (see below) and removes any red/green marks.</p>
+    <p>The two toggles under "Visibility" toggle either the board or the random weapon display on or off. <B>Note:</B> you can click "New Weapon" while the random weapon is hidden, and it will pop up for 10 seconds and hide again.</p>
+    <h3>Settings</h3>
+    <ul>
+        <li><b>Auto-hide Board</b> - This setting causes the board to automatically be hidden 20 seconds after showing it.</li>
+        <li><b>Show weapon names</b> - The bingo board by default does not show weapon names. This setting adds them, in case you're unfamiliar.</li>
+        <li><b>Board weapons only</b> - The randomizer will only give you weapons that are on your bingo board.</li>
+        <li><b>No duplicate weapons</b> - The randomizer will only give you each weapon once.</li>
+    </ul>
+    <h3>Seeds</h3>
+    <p>The seed is what determines what weapons go on the board, and in what order the randomizer shows them. Two players using the same board seed will get the same bingo board. You can use this to either have multiple people use the same bingo board (by setting the board seed) or the same random weapons (by setting the weapon seed) or both.</p>
+    <p>The board seed field will be set to your current seed. The weapon seed is empty by default, meaning you'll get different weapons every time you play. To set a custom seed, enter a number in the field and press the refresh button.</p>
+
     <p><strong>Release Date 5/11/2022</strong></p>
     <p>Changes:</p>
         <ul>
@@ -30,6 +44,26 @@
             <li>Rerolling no longer reloads page</li>
             <li>Allow hiding of board/random weapon</li>
         </ul>
-    </div>
+    <p><strong>Release Date 7/11/2022</strong></p>
+    <p>Changes:</p>
+        <ul>
+            <li>Redid the dock UI</li>
+        </ul>
+        <p><strong>Release Date 8/11/2022</strong></p>
+    <p>Changes:</p>
+        <ul>
+            <li>Removed the original settings panel in favour of the dock. When running outside of OBS the controls will show on the left-hand side of the screen. In OBS they are hidden.</li>
+            <li>Added setting to auto-hide the board</li>
+            <li>Added settings to the weapon randomizer to only show weapons on the board and not roll duplicates</li>
+            <li>Addedd ability to specify the random seed for weapons and the board separarely</li>
+        </ul>
+    <h3>Credits</h3>
+    <ul>
+        <li>Original concept and code by <a href="https://twitch.tv/go1den">Golden (Go1den on Twitch).</a></li>
+        <li>This stream version and OBS control dock by <a href="https://twitch.tv/squidcharger">Marco (SquidCharger on Twitch)</a></li>
+        <li>Weapon graphics by Nintendo.</li>
+    </ul>
+</div>
+
 </body>
 </html>
