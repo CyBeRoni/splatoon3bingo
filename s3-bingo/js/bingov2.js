@@ -37,6 +37,9 @@ function setupBoard(){
 		gsap.set("#randomweapon", { x: wposx, y: wposy});
 	}
 
+	// if the OBS dock is listening, send state.
+	checkVisibility();
+
 }
 
 var bingo = function(weaponMap, size, reseed) {
@@ -342,15 +345,23 @@ function showHideRandomizer(show){
 	} else {
 		gsap.to("#randomweapon", {opacity: 0});
 	}
+
+	bc.postMessage({element: "randomizer", visible: show});
 }
 
 function toggleRandomizer(){
 	showHideRandomizer(!showRandomizer);
 }
 
+function showHideBoard(show){
+	showBoard = show;
+	gsap.to("#results", {opacity: show? 1 : 0});
+
+	bc.postMessage({element: "board", visible: show});
+}
+
 function toggleBoard(){
-	showBoard = !showBoard;
-	gsap.to("#results", {opacity: showBoard? 1 : 0});
+	showHideBoard(!showBoard);
 }
 
 function resetUnknown(){
@@ -386,16 +397,23 @@ function loss(){
 		elem.parentElement.classList.add("redsquare");
 }
 
+// Sync the visibility state of the randomizer and bingo board with
+// the OBS dock
+function checkVisibility(){
+	bc.postMessage({element: "board", visible: showBoard});
+	bc.postMessage({element: "randomizer", visible: showRandomizer});
+}
+
 bc.onmessage = (event) => {
 	switch(event.data.function){
 		case 'clearBoard':
 			clearBoard();
 			break;
 		case 'toggleRandomizer':
-			toggleRandomizer();
+			showHideRandomizer(event.data.arg);
 			break;
 		case 'toggleBoard':
-			toggleBoard();
+			showHideBoard(event.data.arg);
 			break;
 		case 'randomWeapon':
 			randomWeapon();
@@ -409,6 +427,8 @@ bc.onmessage = (event) => {
 		case 'loss':
 			loss();
 			break;
+		case 'checkVisibility':
+			checkVisibility();
 	}
 };
 

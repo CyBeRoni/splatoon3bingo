@@ -1,29 +1,34 @@
+<!doctype html>
 <html>
     <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/selekkt-skelet@latest/css/skelet.min.css">
         <link rel="stylesheet" href="../css/dock.css"/>
+
     </head>
-    <body>
-        <div class="buttonContainer">
-            <div>Bingo Board</div>
-            <div>
-                <button class="button-17" data-msg="clearBoard">Reroll</button>
-            </div>
-        </div>
-        <div class="buttonContainer">
-            <div>Visibility</div>
-            <div>
-                <button class="button-17" data-msg="toggleBoard">Toggle Bingo Board</button>
-                <button class="button-17" data-msg="toggleRandomizer">Toggle Randomizer</button>
-            </div>
-        </div>
-        <div class="buttonContainer">
-            <div>Random Weapon</div>
-            <div>
-                <button class="button-17" data-msg="randomWeapon">Randomise Weapon</button>
-                <button class="button-17" data-msg="resetUnknown">Unknown Weapon</button>
-                <button class="button-17" data-msg="win">Win</button>
-                <button class="button-17" data-msg="loss">Loss</button>
-            </div>
+    <body class="dark-mode">
+        <div class="container">
+            <fieldset>
+                <legend>Bingo Board</legend>
+                <div>
+                    <button class="button fullwidth is-yellow" data-msg="clearBoard">Reroll</button>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Visibility</legend>
+                <div class="subcontainer">
+                    <input id="s-tb" type="checkbox" class="switch" data-msg="toggleBoard"/><label for="s-tb">Show Bingo Board</label>
+                    <input id="s-tr" type="checkbox" class="switch" data-msg="toggleRandomizer"><label for="s-tb">Show Random Weapon</label>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Random Weapon</legend>
+                <div>
+                    <button class="button fullwidth" data-msg="randomWeapon">Randomise Weapon</button>
+                    <button class="button fullwidth" data-msg="resetUnknown">Unknown Weapon</button><br/>
+                    <button class="button halfwidth is-green" data-msg="win">Win</button>
+                    <button class="button halfwidth is-red" data-msg="loss">Loss</button>
+                </div>
+            </fieldset>
         </div>
     </div>
     </body>
@@ -32,10 +37,25 @@
         const bc = new BroadcastChannel("s3-bingo");
 
         document.querySelectorAll("button").forEach(e => {
-            console.log("add")
             e.addEventListener('click', (event) => {
                 bc.postMessage({ function: event.target.dataset.msg });
             })
         });
+
+        document.querySelectorAll(".switch").forEach(e => {
+            e.addEventListener('click', (event) => {
+                bc.postMessage({function: event.target.dataset.msg, arg: event.target.checked})
+            });
+        });
+
+        bc.onmessage = (event) => {
+            if (event.data.element == "board"){
+                document.querySelector("#s-tb").checked = event.data.visible;
+            } else if (event.data.element == "randomizer"){
+                document.querySelector("#s-tr").checked = event.data.visible;
+            }
+        };
+
+        bc.postMessage({function: "checkVisibility"})
         </script>
 </html>
