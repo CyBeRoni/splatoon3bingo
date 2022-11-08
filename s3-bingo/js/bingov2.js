@@ -485,7 +485,7 @@ function loss(){
 	if (! elem)
 		return;
 
-	if (! elem.parentElement.classList.contains("greensquare"))
+		elem.parentElement.classList.remove("greensquare");
 		elem.parentElement.classList.add("redsquare");
 }
 
