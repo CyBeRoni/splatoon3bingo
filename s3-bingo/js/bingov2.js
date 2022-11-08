@@ -309,7 +309,7 @@ function resetRandomizer(cb){
 }
 
 function setRandomWeapon(name, img){
-	let randomizerWasHidden = window.localStorage.showRandomizer !== "true";
+	let randomizerWasHidden = window.localStorage.showRandomizer != undefined && !(window.localStorage.showRandomizer === "true");
 	let tl = gsap.timeline();
 	let showIfHidden = true;
 	let toptext = "Supplied Weapon"
