@@ -11,16 +11,16 @@
             <fieldset>
                 <legend>Random Weapon</legend>
                 <div>
-                    <button class="button fullwidth" data-msg="randomWeapon">New Weapon</button>
+                    <button class="button fullwidth sendbutton" data-msg="randomWeapon">New Weapon</button>
                     <!-- <button class="button fullwidth" data-msg="resetUnknown">Unknown Weapon</button><br/> -->
-                    <button class="button halfwidth is-green" data-msg="win">Green</button>
-                    <button class="button halfwidth is-red" data-msg="loss">Red</button>
+                    <button class="button halfwidth is-green sendbutton" data-msg="setGreen">Green</button>
+                    <button class="button halfwidth is-red sendbutton" data-msg="setRed">Red</button>
                 </div>
             </fieldset>
             <fieldset>
                 <legend>Bingo Board</legend>
                 <div>
-                    <button class="button fullwidth is-yellow" data-msg="clearBoard">Reroll</button>
+                    <button class="button fullwidth is-yellow sendbutton" data-msg="clearBoard"><i class="bi bi-arrow-clockwise"></i> Reroll</button>
                 </div>
             </fieldset>
             <fieldset>
@@ -28,16 +28,16 @@
                 <div class="subcontainer">
                     <input id="s-tb" type="checkbox" class="switch storetoggle" data-msg="showBoard"/><label for="s-tb">Show Bingo Board</label><br/>
                     <input id="s-tr" type="checkbox" class="switch storetoggle" data-msg="showRandomizer"><label for="s-tr">Show Random Weapon</label><br/>
-                    <input id="s-sb" type="checkbox" class="switch storetoggle" data-msg="smallBoard"/><label for="s-sb">Small Board</label><br/>
-                    <input id="s-stb" type="checkbox" class="switch storetoggle" data-msg="seethroughBoard"/><label for="s-stb">Translucent Board</label><br/>
                 </div>
             </fieldset>
             <fieldset>
                 <legend>Board Settings</legend>
                 <div class="subcontainer">
+                    <input id="s-sb" type="checkbox" class="switch storetoggle" data-msg="smallBoard"/><label for="s-sb">Small Board</label><br/>
+                    <input id="s-stb" type="checkbox" class="switch storetoggle" data-msg="seethroughBoard"/><label for="s-stb">Translucent Board</label><br/>
                     <input id="s-ahb" type="checkbox" class="switch storetoggle" data-msg="autoHideBoard"/><label for="s-ahb">Auto-hide Board (20s)</label>
                     <input id="s-swn" type="checkbox" class="switch storetoggle" data-msg="showWeaponNames"><label for="s-swn">Show weapon names</label>
-                    <input id="t-bseed" type="text" style="width: 45%" class="storetext" data-msg="boardSeed" placeholder="seed"><label for="t-bseed"><button class="button is-outline" onclick="setBoardSeed()"><i class="bi bi-arrow-clockwise"></i></button>Seed</label>
+                    <input id="t-bseed" type="text" style="width: 45%" class="storetext" data-msg="boardSeed" placeholder="seed"><label for="t-bseed"><button class="button is-outline" onclick="setBoardSeed()"><i class="bi bi-save"></i></button>Seed</label>
                 </div>
             </fieldset>
             <fieldset>
@@ -45,8 +45,8 @@
                 <div class="subcontainer">
                     <input id="s-bwo" type="checkbox" class="switch storetoggle" data-msg="boardWeaponsOnly"><label for="s-bwo">Board weapons only</label>
                     <input id="s-ndw" type="checkbox" class="switch storetoggle" data-msg="noDuplicateWeapons"><label for="s-ndw">No duplicate weapons</label>
-                    <input id="t-wseed" type="text" style="width: 45%" class="storetext" data-msg="weaponSeed" placeholder="seed"><label for="t-wseed"><button class="button is-outline" onclick="setWeaponSeed()"><i class="bi bi-arrow-clockwise"></i></button>Seed</label>
-                    <button class="button fullwidth is-small is-outline" data-msg="resetWeaponRolls">Reset rolled weapons</button>
+                    <input id="t-wseed" type="text" style="width: 45%" class="storetext" data-msg="weaponSeed" placeholder="seed"><label for="t-wseed"><button class="button is-outline" onclick="setWeaponSeed()"><i class="bi bi-save"></i></button>Seed</label>
+                    <button class="button fullwidth is-small is-outline sendbutton" data-msg="resetWeaponSeed"><i class="bi bi-arrow-clockwise"></i> Reroll Weapons</button>
                 </div>
             </fieldset>
         </div>
@@ -65,7 +65,7 @@
             seethroughBoard: false
         };
 
-        document.querySelectorAll("button").forEach(e => {
+        document.querySelectorAll(".sendbutton").forEach(e => {
             e.addEventListener('click', (event) => {
                 bc.postMessage({ function: event.target.dataset.msg });
             })
