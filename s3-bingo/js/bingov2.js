@@ -5,6 +5,9 @@ var boardRNG;
 var weaponRNG;
 
 const bc = new BroadcastChannel("s3-bingo");
+const rouletteSound = new Audio("../sound/roulette_mixdown2.wav");
+const newWeaponSound = new Audio("../sound/ShopLyt_BuyDecide.wav");
+const reRollSound = new Audio("../sound/ShrLyt_InkResetting.wav");
 
 function getParam(name){
 	const urlParams = new URLSearchParams(window.location.search);
@@ -235,7 +238,9 @@ var bingo = function(weaponMap, size, reseed, seed) {
 		});
 	}})
 	.set(".slotcontent", { opacity: 0, scale: 0})
-	.set(".slotweaponname", { opacity: 0})
+	.set(".slotweaponname", { opacity: 0, onComplete: () => {
+		if (sound) reRollSound.play();
+	}})
 	.to(".slotcontent", {duration: 0.5, opacity: 1, stagger: {
 		each: 0.05,
 		grid: "auto",
@@ -333,10 +338,13 @@ function setRandomWeapon(name, img){
 	if (randomizerWasHidden && showIfHidden){
 		resetRandomizer(() => {
 			showHideRandomizer(true);
-			tl.delay(1);
+			rouletteSound.play();
+			tl.delay(1.2);
 			setTimeout(() => { showHideRandomizer(false)}, 10000);
 		});
 
+	} else {
+		newWeaponSound.play();
 	}
 
 	tl.to("#randomweapon_weapon, #randomweapon_bottomtext",
