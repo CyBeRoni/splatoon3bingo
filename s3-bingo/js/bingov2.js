@@ -16,11 +16,20 @@ function getParam(name){
 
 function setupBoard(){
 
-	$("#bingo tr td:not(.popout), #selected td").toggle(
-		function () { $(this).addClass("greensquare"); },
-		function () { $(this).addClass("redsquare").removeClass("greensquare"); },
-		function () { $(this).removeClass("redsquare"); }
-	);
+	document.querySelectorAll("td.slot").forEach(elem => {
+		elem.addEventListener('click', (event) => {
+			e = event.currentTarget;
+
+			if (!e.classList.contains("greensquare") && !e.classList.contains("redsquare")){
+				e.classList.add("greensquare");
+			} else if (e.classList.contains("greensquare")){
+				e.classList.remove("greensquare");
+				e.classList.add("redsquare");
+			} else {
+				e.classList.remove("redsquare")
+			}
+		});
+	});
 
 	let bpos = getParam("b");
 	let wpos = getParam("w");
@@ -43,9 +52,10 @@ function setupBoard(){
 	// if the OBS dock is listening, send state.
 	let showBoard = window.localStorage.showBoard;
 	let showRandomizer = window.localStorage.showRandomizer;
+	let smallBoard = window.localStorage.smallBoard;
 	showHideBoard(showBoard === "true" || showBoard == undefined);
 	showHideRandomizer(showRandomizer === "true" || showRandomizer == undefined);
-
+	setSmallBoard(smallBoard === "true", true);
 	weaponRNG = new Math.seedrandom();
 
 	// If we're in a browser rather than OBS, show the dock panel for controls.
@@ -57,9 +67,11 @@ function setupBoard(){
 		document.body.appendChild(dock);
 	}
 
+	bingo(weaponMap);
+
 }
 
-var bingo = function(weaponMap, size, reseed, seed) {
+bingo = function(weaponMap, reseed, seed, sound) {
 
 	var SEED = getParam( 'seed' );
 
@@ -68,21 +80,6 @@ var bingo = function(weaponMap, size, reseed, seed) {
 	boardRNG = new Math.seedrandom(parseInt(SEED)); //sets up the RNG
 
 	// document.querySelector("#seedinfo").innerHTML = `Seed: ${SEED}`;
-
-	$("#row1").hover(function() { $(".row1").addClass("hover"); }, function() {	$(".row1").removeClass("hover"); });
-	$("#row2").hover(function() { $(".row2").addClass("hover"); }, function() {	$(".row2").removeClass("hover"); });
-	$("#row3").hover(function() { $(".row3").addClass("hover"); }, function() {	$(".row3").removeClass("hover"); });
-	$("#row4").hover(function() { $(".row4").addClass("hover"); }, function() {	$(".row4").removeClass("hover"); });
-	$("#row5").hover(function() { $(".row5").addClass("hover"); }, function() {	$(".row5").removeClass("hover"); });
-
-	$("#col1").hover(function() { $(".col1").addClass("hover"); }, function() {	$(".col1").removeClass("hover"); });
-	$("#col2").hover(function() { $(".col2").addClass("hover"); }, function() {	$(".col2").removeClass("hover"); });
-	$("#col3").hover(function() { $(".col3").addClass("hover"); }, function() {	$(".col3").removeClass("hover"); });
-	$("#col4").hover(function() { $(".col4").addClass("hover"); }, function() {	$(".col4").removeClass("hover"); });
-	$("#col5").hover(function() { $(".col5").addClass("hover"); }, function() {	$(".col5").removeClass("hover"); });
-
-	$("#tlbr").hover(function() { $(".tlbr").addClass("hover"); }, function() {	$(".tlbr").removeClass("hover"); });
-	$("#bltr").hover(function() { $(".bltr").addClass("hover"); }, function() {	$(".bltr").removeClass("hover"); });
 
 	function isDuplicateType (myBoard, i, currentWeapon) {
         if(myBoard[i] !== undefined && myBoard[i] == currentWeapon) {
@@ -357,11 +354,10 @@ function setRandomWeapon(name, img){
 			document.querySelector("#randomweapon_bottomtext").innerHTML = name;
 			document.querySelector("#randomweapon_middletext").innerHTML = middletext;
 			document.querySelector("#randomweapon_toptext").innerHTML = toptext;
-
 	    }
 	  })
 	.set("#randomweapon_weapon", { scale: 0.5, rotation: 0 })
-	.to("#randomweapon_weapon", { scale: 1, ease: "elastic.out(1, 0.3)", duration: 1.5})
+	.to("#randomweapon_weapon", { scale: 1, ease: "elastic.out(1, 0.3)", duration: 1.0})
 	.to("#randomweapon_weapon", {opacity: 1, rotation: 0}, "<")
 	.to("#randomweapon_bottomtext", {opacity: 1}, "<");
 }
@@ -407,7 +403,7 @@ function clearBoard(seed){
 	.to(".slotweaponname", { opacity: 0, duration: showWeaponNames ? 0.25 : 0})
 	.to(".slotcontent", { opacity: 0, duration: 0.5, scale: 0, stagger: { each: 0.05, grid: "auto", from: "center"},
 		onComplete: function() {
-			srl.bingo(weaponMap, 5, true, seed);
+			bingo(weaponMap, true, seed, true);
 		}
 	});
 }
@@ -462,6 +458,31 @@ function toggleBoard(){
 
 	window.localStorage.showBoard = !showBoard;
 	showHideBoard(!showBoard);
+}
+
+function setSmallBoard(val, instant){
+	let scale = 1;
+	let originLR = "right";
+	let originTB = "top";
+	let animate = gsap.to;
+
+	table = document.querySelector("#results");
+	pos = table.getBoundingClientRect();
+	bodysize = document.body.getBoundingClientRect();
+
+	if (pos.x + (pos.width / 2) < bodysize.width / 2){
+		originLR = 'left';
+	}
+	if (pos.y + (pos.height / 2) > bodysize.height / 2){
+		originTB = "bottom"
+	}
+	if (val)
+		scale = 0.5;
+	if (instant)
+		animate = gsap.set;
+
+	let origin = `${originLR} ${originTB}`;
+	animate("#results", {scale: scale, transformOrigin: origin});
 }
 
 function resetUnknown(){
@@ -560,6 +581,10 @@ setStorageCallback("showRandomizer", (e) => {
 setStorageCallback("showWeaponNames", (e) => {
 	showHideWeaponNames(e.newValue === "true");
 });
+
+setStorageCallback("smallBoard", (e) => {
+	setSmallBoard(e.newValue === "true");
+})
 
 function onImageLoad(elem, cb){
     if (elem.complete){

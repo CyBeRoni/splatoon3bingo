@@ -102,4 +102,3 @@ weaponMap.set('Brush', brushList);
 weaponMap.set('Stringer', stringerList);
 weaponMap.set('Splatana', splatanaList);
 
-$(function() { srl.bingo(weaponMap, 5); });
