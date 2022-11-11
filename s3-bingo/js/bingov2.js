@@ -53,9 +53,12 @@ function setupBoard(){
 	let showBoard = window.localStorage.showBoard;
 	let showRandomizer = window.localStorage.showRandomizer;
 	let smallBoard = window.localStorage.smallBoard;
+	let seethroughBoard = window.localStorage.setseethroughBoard;
+
 	showHideBoard(showBoard === "true" || showBoard == undefined);
 	showHideRandomizer(showRandomizer === "true" || showRandomizer == undefined);
 	setSmallBoard(smallBoard === "true", true);
+	setseethroughBoard(seethroughBoard === "true")
 	weaponRNG = new Math.seedrandom();
 
 	// If we're in a browser rather than OBS, show the dock panel for controls.
@@ -481,8 +484,21 @@ function setSmallBoard(val, instant){
 	if (instant)
 		animate = gsap.set;
 
-	let origin = `${originLR} ${originTB}`;
+	let origin = `${originTB} ${originLR}`;
 	animate("#results", {scale: scale, transformOrigin: origin});
+}
+
+function setseethroughBoard(val, instant){
+	let animate = gsap.to;
+	let background = "rgba(0,0,0,1)";
+
+	if (val)
+		background = "rgba(0,0,0,0.75)";
+
+	if (instant)
+		animate = gsap.set;
+
+	animate("#bingo tr td", { backgroundColor: background});
 }
 
 function resetUnknown(){
@@ -584,7 +600,11 @@ setStorageCallback("showWeaponNames", (e) => {
 
 setStorageCallback("smallBoard", (e) => {
 	setSmallBoard(e.newValue === "true");
-})
+});
+
+setStorageCallback("seethroughBoard", (e) => {
+	setseethroughBoard(e.newValue === "true");
+});
 
 function onImageLoad(elem, cb){
     if (elem.complete){

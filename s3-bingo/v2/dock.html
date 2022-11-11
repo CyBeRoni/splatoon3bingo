@@ -29,6 +29,7 @@
                     <input id="s-tb" type="checkbox" class="switch storetoggle" data-msg="showBoard"/><label for="s-tb">Show Bingo Board</label><br/>
                     <input id="s-tr" type="checkbox" class="switch storetoggle" data-msg="showRandomizer"><label for="s-tr">Show Random Weapon</label><br/>
                     <input id="s-sb" type="checkbox" class="switch storetoggle" data-msg="smallBoard"/><label for="s-sb">Small Board</label><br/>
+                    <input id="s-stb" type="checkbox" class="switch storetoggle" data-msg="seethroughBoard"/><label for="s-stb">Translucent Board</label><br/>
                 </div>
             </fieldset>
             <fieldset>
@@ -60,6 +61,8 @@
             autoHideBoard: false,
             showWeaponNames: false,
             boardWeaponsOnly: false,
+            smallBoard: false,
+            seethroughBoard: false
         };
 
         document.querySelectorAll("button").forEach(e => {
