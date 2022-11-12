@@ -41,6 +41,7 @@ function setup(){
 	let showRandomizer = window.localStorage.showRandomizer;
 	let smallBoard = window.localStorage.smallBoard;
 	let seethroughBoard = window.localStorage.seethroughBoard;
+	let chaosMode = window.localStorage.chaosMode;
 
 	showHideBoard(showBoard === "true" || showBoard == undefined);
 	showHideRandomizer(showRandomizer === "true" || showRandomizer == undefined);
@@ -98,8 +99,9 @@ function generateBoard(reseed, seed, sound = true){
 	var SEED = getParam('seed');
 
 	if(SEED == undefined || SEED == "" || reseed) SEED = reseedPage(seed);
+	let chaosMode = window.localStorage.chaosMode == undefined || window.localStorage.chaosMode === "false"; // false if not set.
 
-	let board = new BingoBoard(weaponMap, `${SEED}`, true);
+	let board = new BingoBoard(weaponMap, `${SEED}`, chaosMode);
 	let bingoBoard = board.getBoard();
 
 	let showWeaponNames = window.localStorage.showWeaponNames === "true";
