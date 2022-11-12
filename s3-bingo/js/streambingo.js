@@ -262,7 +262,7 @@ function clearBoard(seed){
 			// 	weapons.board = board.board;
 			// 	weapons.pool = weapons.setupPool();
 			// }
-			weapons = setWeaponSeed();
+			weapons = setWeaponSeed(window.localStorage.weaponSeed);
 		}
 	});
 }
