@@ -303,7 +303,8 @@ function setseethroughBoard(val, instant){
 	if (instant)
 		animate = gsap.set;
 
-	animate("#bingo tr td", { backgroundColor: background});
+	//animate("#bingo tr td", { backgroundColor: background});
+	animate("td.slot", { opacity: val ? 0.75 : 1})
 }
 
 function showHideRandomizer(show){
