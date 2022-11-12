@@ -11,6 +11,7 @@ html {
 
 body {
 	background-color: rgb(24, 24, 24);
+	/* background-color: red; */
 	color:#bec7d2;
 	font-family:Helvetica, Arial, sans-serif;
 	font-size:.88em;
@@ -67,16 +68,13 @@ td {
 }
 
 #bingoPage #bingo tr td {
-	-moz-box-shadow:inset 0 0 50px rgba(0,0,0,0.6);
-	-webkit-box-shadow:inset 0 0 50px rgba(0,0,0,0.6);
 	background-color:rgba(0, 0, 0, 1);
 	border:1px #424242 solid;
-	box-shadow:inset 0 0 50px rgba(0,0,0,0.6);
 	cursor:pointer;
 	text-align:center;
 
-	height:128px;
-	width:128px;
+	/* height:128px;
+	width:128px; */
     /* max-width:110px;
     max-height:110px; */
 }
@@ -84,6 +82,23 @@ td {
 #bingoPage #bingo tr td:hover,#bingoPage #bingo tr td.hover {
 	background:#001a36;
 	color:#fff;
+}
+
+
+.green {
+	background:#051;
+}
+
+.green:hover {
+	background:#072;
+}
+
+.red {
+	background:#501;
+}
+
+.red:hover {
+	background:#702;
 }
 
 #bingoPage #bingo tr td.greensquare {
@@ -168,12 +183,14 @@ td {
 }
 
 .slotcontent {
+	box-shadow:inset 0 0 50px rgba(0,0,0,0.6);
+
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	height: 100%;
-	width: 100%;
+	height: 128px;
+	width: 128px;
 }
 
 .slotweaponimage {
@@ -182,13 +199,18 @@ td {
 }
 
 .slotweaponimage img {
-max-height: 100%;
-max-width: 100%;
-display: block;
+	max-height: 100%;
+	max-width: 100%;
+	display: block;
 }
 
 .slotweaponname {
+	height: 128px;
+	width: 128px;
+	display: flex;
+	flex-direction: column;
+	justify-content: end;
 	position: absolute;
-	bottom: 0px;
+	text-shadow:1px 1px 0 rgba(0,0,0,1);
 }
 

@@ -40,12 +40,12 @@ function setup(){
 	let showBoard = window.localStorage.showBoard;
 	let showRandomizer = window.localStorage.showRandomizer;
 	let smallBoard = window.localStorage.smallBoard;
-	let seethroughBoard = window.localStorage.setseethroughBoard;
+	let seethroughBoard = window.localStorage.seethroughBoard;
 
 	showHideBoard(showBoard === "true" || showBoard == undefined);
 	showHideRandomizer(showRandomizer === "true" || showRandomizer == undefined);
 	setSmallBoard(smallBoard === "true", true);
-	setseethroughBoard(seethroughBoard === "true")
+	setseethroughBoard(seethroughBoard === "true");
 
 	// If we're in a browser rather than OBS, show the dock panel for controls.
 	if (window.obsstudio == undefined){
@@ -57,20 +57,20 @@ function setup(){
 	}
 
 	board = generateBoard(undefined, undefined, false);
-	weapons = generateWeapons();
+	weapons = setWeaponSeed();
 
 	// Enable clicking squares to mark green or red
 	document.querySelectorAll("td.slot").forEach(elem => {
 		elem.addEventListener('click', (event) => {
-			let e = event.currentTarget;
+			let e = event.currentTarget.querySelector("div.slotcontent");
 
-			if (!e.classList.contains("greensquare") && !e.classList.contains("redsquare")){
-				e.classList.add("greensquare");
-			} else if (e.classList.contains("greensquare")){
-				e.classList.remove("greensquare");
-				e.classList.add("redsquare");
+			if (!e.classList.contains("green") && !e.classList.contains("red")){
+				e.classList.add("green");
+			} else if (e.classList.contains("green")){
+				e.classList.remove("green");
+				e.classList.add("red");
 			} else {
-				e.classList.remove("redsquare")
+				e.classList.remove("red")
 			}
 		});
 	});
@@ -109,19 +109,20 @@ function generateBoard(reseed, seed, sound = true){
 		this.targets().forEach(e => {
 			let i = parseInt(e.dataset.index) - 1;
 			e.dataset.weapon = bingoBoard[i].name;
-			e.querySelector(".slotweaponimage").innerHTML = `<img src=${bingoBoard[i].image}>`;
+			e.querySelector(".slotweaponimage img").src = bingoBoard[i].image;
 			e.querySelector(".slotweaponname").innerHTML = bingoBoard[i].name;
 		});
 	}})
-	.set(".slotcontent", { opacity: 0, scale: 0})
+	.set(".slotweaponimage img", { opacity: 0, scale: 0})
 	.set(".slotweaponname", { opacity: 0, onComplete: () => {
 		if (sound) reRollSound.play();
-	}})	.to(".slotcontent", {duration: 0.5, opacity: 1, stagger: {
+	}})
+	.to(".slotweaponimage img", {duration: 0.5, opacity: 1, stagger: {
 		each: 0.05,
 		grid: "auto",
 		from: "center"
 	} })
-	.to(".slotcontent", {duration: 1.0, scale: 1, ease: "back.out(3)", stagger: {
+	.to(".slotweaponimage img", {duration: 1.0, scale: 1, ease: "back.out(3)", stagger: {
 		each: 0.05,
 		grid: "auto",
 		from: "center"
@@ -234,24 +235,34 @@ function setWeaponSeed(newSeed){
 	let noDuplicateWeapons = window.localStorage.noDuplicateWeapons === "true" // default false
 
 	console.log("weapons seed to", newSeed, boardWeaponsOnly, noDuplicateWeapons);
-	weapons = generateWeapons(newSeed, boardWeaponsOnly, noDuplicateWeapons);
+
+	let weapons = generateWeapons(newSeed, boardWeaponsOnly, noDuplicateWeapons);
+
+	return weapons;
 }
 
 
 function clearBoard(seed){
 
-	document.querySelectorAll(".redsquare, .greensquare").forEach(e => {
-		e.classList.remove("redsquare");
-		e.classList.remove("greensquare");
+	document.querySelectorAll(".red, .green").forEach(e => {
+		e.classList.remove("red");
+		e.classList.remove("green");
 	})
 
 	let showWeaponNames = window.localStorage.showWeaponNames === "true";
 
 	gsap.timeline()
 	.to(".slotweaponname", { opacity: 0, duration: showWeaponNames ? 0.25 : 0})
-	.to(".slotcontent", { opacity: 0, duration: 0.5, scale: 0, stagger: { each: 0.05, grid: "auto", from: "center"},
+	.to(".slotweaponimage img", { opacity: 0, duration: 0.5, scale: 0, stagger: { each: 0.05, grid: "auto", from: "center"},
 		onComplete: function() {
-			generateBoard(true, seed);
+			board = generateBoard(true, seed);
+
+			// if (window.localStorage.boardWeaponsOnly === "true"){
+			// 	console.log("resetting weapons pool");
+			// 	weapons.board = board.board;
+			// 	weapons.pool = weapons.setupPool();
+			// }
+			weapons = setWeaponSeed();
 		}
 	});
 }
@@ -303,8 +314,7 @@ function setseethroughBoard(val, instant){
 	if (instant)
 		animate = gsap.set;
 
-	//animate("#bingo tr td", { backgroundColor: background});
-	animate("td.slot", { opacity: val ? 0.75 : 1})
+	animate("#bingo tr td", { backgroundColor: background});
 }
 
 function showHideRandomizer(show){
@@ -369,8 +379,8 @@ function setGreen(){
 	if (! elem)
 		return;
 
-	elem.parentElement.classList.remove("redsquare");
-	elem.parentElement.classList.add("greensquare");
+	elem.classList.remove("red");
+	elem.classList.add("green");
 }
 
 function setRed(){
@@ -379,8 +389,8 @@ function setRed(){
 	if (! elem)
 		return;
 
-		elem.parentElement.classList.remove("greensquare");
-		elem.parentElement.classList.add("redsquare");
+		elem.classList.remove("green");
+		elem.classList.add("red");
 }
 
 bc.onmessage = (event) => {
@@ -410,10 +420,10 @@ bc.onmessage = (event) => {
 			reseedBoardWithSeed(event.data.arg);
 			break;
 		case 'setWeaponSeed':
-			setWeaponSeed(event.data.arg);
+			weapons = setWeaponSeed(event.data.arg);
 			break;
 		case 'resetWeaponSeed':
-			setWeaponSeed();
+			weapons = setWeaponSeed();
 	}
 }
 
