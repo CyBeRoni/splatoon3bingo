@@ -27,6 +27,8 @@
     <p>The two toggles under "Visibility" toggle either the board or the random weapon display on or off. <B>Note:</B> you can click "New Weapon" while the random weapon is hidden, and it will pop up for 10 seconds and hide again.</p>
     <h3>Settings</h3>
     <ul>
+        <li><b>Small Board</b> - This setting scales the bingo board down by 50% making it more reasonable to leave on-screen during games.</li>
+        <li><b>Translucent Board</b> - The board is made see-through so it shows what's behind it.</li>
         <li><b>Auto-hide Board</b> - This setting causes the board to automatically be hidden 20 seconds after showing it.</li>
         <li><b>Show weapon names</b> - The bingo board by default does not show weapon names. This setting adds them, in case you're unfamiliar.</li>
         <li><b>Board weapons only</b> - The randomizer will only give you weapons that are on your bingo board.</li>
@@ -34,8 +36,8 @@
     </ul>
     <h3>Seeds</h3>
     <p>The seed is what determines what weapons go on the board, and in what order the randomizer shows them. Two players using the same board seed will get the same bingo board. You can use this to either have multiple people use the same bingo board (by setting the board seed) or the same random weapons (by setting the weapon seed) or both.</p>
-    <p>The board seed field will be set to your current seed. The weapon seed is empty by default, meaning you'll get different weapons every time you play. To set a custom seed, enter a number in the field and press the refresh button.</p>
-    <p><b>Important:</b> if you're using a custom weapon seed with multiple people, <em>do not enable "Board weapons only"</em> as you will not get the same weapons in that case, and make sure everyone has the "No duplicate weapons" setting the same.</em></p>
+    <p>To set a custom seed, enter a number in the field and press the save button. Your board will immediately re-roll to match the seed. Setting the the board seed also resets the weapon randomizer; press "re-roll weapons" to get new weapons.</p>
+    <p><b>Important:</b> if you're using a custom weapon seed with multiple people, <em>do not enable "Board weapons only"</em> if you use different boards as you will not get the same weapons in that case, and make sure everyone has the "No duplicate weapons" setting the same.</em></p>
 
     <h3>Version history</h3>
     <p><strong>Release Date 5/11/2022</strong></p>
@@ -67,6 +69,13 @@
                 <li>Removed the row/column headers</li>
                 <li>Added some funky sounds</li>
             </ul>
+        <p><strong>Release Date 12/11/2022</strong></p>
+            <p>Changes:</p>
+                <ul>
+                    <li>Fix marking red/green squares</li>
+                    <li>Use go1den's new board/weapon generators. When using the same seeds you should get the same boards and weapon sequence.</li>
+                    <li>Rerolling the board now also re-rolls the weapons</li>
+                </ul>
 
                 <h3>Credits</h3>
     <ul>
