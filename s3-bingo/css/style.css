@@ -33,7 +33,7 @@ iframe.dock {
 	width: 250px;
 }
 
-#randomweapon {
+#randomweapon_container {
 	position: absolute;
 	right: 30px;
 	bottom: 30px;
@@ -135,7 +135,7 @@ td {
 	justify-content: center;
 }
 
-#randomweapon_ctr {
+#randomweapon_content {
 	display: grid;
 	grid-template-columns: 40% auto;
 	grid-template-rows: 33% 33% 33%;
@@ -175,7 +175,8 @@ td {
 	grid-row: 1 / 4;
 	display: flex;
 	flex-direction: row;
-	justify-content: right;
+	justify-content: flex-end;
+	/* filter: drop-shadow(5px 5px 2px black); */
 }
 
 #randomweapon_weapon img {
@@ -209,7 +210,7 @@ td {
 	width: 128px;
 	display: flex;
 	flex-direction: column;
-	justify-content: end;
+	justify-content: flex-end;
 	position: absolute;
 	text-shadow:1px 1px 0 rgba(0,0,0,1);
 }
