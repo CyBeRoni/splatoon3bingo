@@ -12,22 +12,15 @@
                 <legend>Random Weapon</legend>
                 <div>
                     <button class="button fullwidth sendbutton" onclick="" data-msg="randomWeapon">New Weapon</button>
-                    <!-- <button class="button fullwidth" data-msg="resetUnknown">Unknown Weapon</button><br/> -->
                     <button class="button halfwidth is-green sendbutton" data-msg="setGreen">Green</button>
                     <button class="button halfwidth is-red sendbutton" data-msg="setRed">Red</button>
                 </div>
             </fieldset>
-            <!-- <fieldset>
-                <legend>Bingo Board</legend>
-                <div>
-                    <button class="button fullwidth is-yellow sendbutton" data-msg="clearBoard"><i class="bi bi-arrow-clockwise"></i> Reroll</button>
-                </div>
-            </fieldset> -->
             <fieldset>
                 <legend>Visibility</legend>
                 <div class="subcontainer">
                     <input id="s-tb" type="checkbox" class="switch storetoggle" data-msg="showBoard"/><label for="s-tb">Show Bingo Board</label><br/>
-                    <input id="s-tr" type="checkbox" class="switch storetoggle" data-msg="showRandomizer"><label for="s-tr">Show Random Weapon</label><br/>
+                    <input id="s-tr" type="checkbox" class="switch storetoggle" data-msg="showRandomizer"><label for="s-tr">Show Weapon <i class="bi bi-info-circle" data-tippy-content="If hidden, will pop up for 10 seconds when you pick a new weapon."></i></label><br/>
                 </div>
             </fieldset>
             <fieldset>
@@ -38,7 +31,7 @@
                     <input id="s-ahb" type="checkbox" class="switch storetoggle" data-msg="autoHideBoard"/><label for="s-ahb">Auto-hide Board (20s)</label>
                     <input id="s-swn" type="checkbox" class="switch storetoggle" data-msg="showWeaponNames"><label for="s-swn">Show weapon names</label>
                     <hr/>
-                    <input id="s-cm" type="checkbox" class="switch receivetoggle needssave" data-save="saveBoard" data-msg="chaosMode"><label for="s-cm">Chaos Mode</label>
+                    <input id="s-cm" type="checkbox" class="switch receivetoggle needssave" data-save="saveBoard" data-msg="chaosMode"><label for="s-cm">Chaos Mode <i class="bi bi-info-circle" data-tippy-content="Chaos Mode makes the board fully random instead of trying to balance the squares."></i></label>
                     <input id="t-bseed" type="text" style="width: 45%" class="storetext needssave" data-save="saveBoard" data-msg="boardSeed" placeholder="seed">
                     <label for="t-bseed"><button class="button is-outline needssave" onclick="newSeed(this)" data-save="saveBoard" data-target="t-bseed"><i class="bi bi-arrow-clockwise"></i></button>Seed</label>
                     <button class="button is-outline fullwidth" disabled onclick="saveBoardSettings(this)" id="saveBoard"><i class="bi bi-save"></i><div>Save</div></button>
@@ -53,17 +46,21 @@
                     <input id="s-ndw" type="checkbox" class="switch receivetoggle needssave" data-save="saveWeapon" data-msg="noDuplicateWeapons"><label for="s-ndw">No duplicate weapons</label>
                     <input id="t-wseed" type="text" style="width: 45%" class="storetext needssave" data-save="saveWeapon" data-msg="weaponSeed" placeholder="seed">
                     <label for="t-wseed"><button class="button is-outline needssave" onclick="newSeed(this)" data-save="saveWeapon" data-target="t-wseed"><i class="bi bi-arrow-clockwise"></i></button>Seed</label>
-                    <!-- <button class="button fullwidth is-small is-outline sendbutton" data-msg="resetWeaponSeed"><i class="bi bi-arrow-clockwise"></i> Reroll Weapons</button> -->
                     <button class="button is-outline fullwidth" disabled onclick="saveWeaponSettings(this)" id="saveWeapon"><i class="bi bi-save"></i><div>Save</div></button>
                     <div class="warning"><i class="bi bi-exclamation-triangle"></i><span>Save resets weapons</span></div>
                 </div>
             </fieldset>
         </div>
     </div>
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
     </body>
 
     <script>
+        tippy('[data-tippy-content]');
         const bc = new BroadcastChannel("s3-bingo");
+
+
         const defaults = {
             showBoard: true,
             showRandomizer: true,
@@ -71,6 +68,7 @@
             showWeaponNames: false,
             boardWeaponsOnly: false,
             smallBoard: false,
+            smallWeapon: false,
             seethroughBoard: false
         };
 
@@ -172,6 +170,7 @@
         function newSeed(target){
             document.querySelector(`#${target.dataset.target}`).value = Math.ceil(Math.random() * 999999);
         }
+
 
     </script>
 </html>

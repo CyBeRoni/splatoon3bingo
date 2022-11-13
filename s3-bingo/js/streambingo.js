@@ -151,7 +151,7 @@ function resetRandomizer(cb){
 	img.src = "../img/unknownsplat1.png"
 	if (cb !== undefined)
 		onImageLoad(img, cb);
-	document.querySelector("#randomweapon_bottomtext").innerHTML = "Unknown weapon…";
+	document.querySelector("#randomweapon_bottomtext").innerHTML = "Unknown Weapon…";
 	document.querySelector("#randomweapon_middletext").innerHTML = "You'll be given an";
 }
 
@@ -436,6 +436,7 @@ bc.onmessage = (event) => {
 
 
 			weapons = setWeaponSeed(event.data.arg.weaponSeed);
+			resetRandomizer();
 			break;
 		case 'resetWeaponSeed':
 			weapons = setWeaponSeed();
