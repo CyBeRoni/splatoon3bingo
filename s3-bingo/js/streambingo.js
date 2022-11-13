@@ -57,8 +57,8 @@ function setup(){
 		document.body.appendChild(dock);
 	}
 
-	board = generateBoard(undefined, undefined, false);
-	weapons = setWeaponSeed();
+	board = generateBoard(false, window.localStorage.boardSeed, false);
+	weapons = setWeaponSeed(window.localStorage.weaponSeed);
 
 	// Enable clicking squares to mark green or red
 	document.querySelectorAll("td.slot").forEach(elem => {
@@ -80,14 +80,14 @@ function setup(){
 
 function generateWeapons(seed, boardOnly = false, noDuplicateWeapons = false){
 	let ignoreSeed = false; // Always use the seed we give
-
 	if (!seed){
 		let weaponRNG = new Math.seedrandom();
 		seed = Math.ceil(999999 * weaponRNG())
 		console.log("generated new weapon seed:", seed);
+		window.localStorage.weaponSeed = seed;
 	}
 
-	window.localStorage.weaponSeed = seed;
+
 
 	let wr = new WeaponRandomizer(board, `${seed}`, !boardOnly, !noDuplicateWeapons, ignoreSeed);
 
@@ -95,8 +95,8 @@ function generateWeapons(seed, boardOnly = false, noDuplicateWeapons = false){
 }
 
 function generateBoard(reseed, seed, sound = true){
-	console.log('seed: ', seed);
-	var SEED = getParam('seed');
+	console.log('specified seed: ', seed);
+	var SEED = window.localStorage.boardSeed;
 
 	if(SEED == undefined || SEED == "" || reseed) SEED = reseedPage(seed);
 	let chaosMode = window.localStorage.chaosMode == undefined || window.localStorage.chaosMode === "false"; // false if not set.
@@ -210,8 +210,8 @@ function setRandomWeapon(name, img){
 
 function setParam(paramName, val){
 	const params = new URLSearchParams(location.search);
-	params.set(paramName, val);
-	window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
+	// params.set(paramName, val);
+	// window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
 }
 
 
@@ -235,7 +235,7 @@ function reseedPage(newSeed){
 function setWeaponSeed(newSeed){
 	let boardWeaponsOnly = window.localStorage.boardWeaponsOnly === "true"; // default false
 	let noDuplicateWeapons = window.localStorage.noDuplicateWeapons === "true" // default false
-
+	window.localStorage.weaponSeed = newSeed;
 	console.log("weapons seed to", newSeed, boardWeaponsOnly, noDuplicateWeapons);
 
 	let weapons = generateWeapons(newSeed, boardWeaponsOnly, noDuplicateWeapons);
@@ -327,11 +327,11 @@ function setseethroughBoard(val, instant){
 
 function showHideRandomizer(show){
 	if (show){
-		gsap.timeline().set("#randomweapon", {opacity: 0, scale: 0.7})
-		.to("#randomweapon", {opacity: 1, duration: 0.4})
-		.to("#randomweapon", {scale: 1.0, duration: 0.8, ease: "elastic.out(1, 0.3)"}, '<');
+		gsap.timeline().set("#randomweapon_container", {opacity: 0, scale: 0.7})
+		.to("#randomweapon_container", {opacity: 1, duration: 0.4})
+		.to("#randomweapon_container", {scale: 1.0, duration: 0.8, ease: "elastic.out(1, 0.3)"}, '<');
 	} else {
-		gsap.to("#randomweapon", {opacity: 0});
+		gsap.to("#randomweapon_container", {opacity: 0});
 	}
 }
 
@@ -424,11 +424,18 @@ bc.onmessage = (event) => {
 		case 'checkVisibility':
 			checkVisibility();
 			break;
-		case 'reseedBoardWithSeed':
-			reseedBoardWithSeed(event.data.arg);
+		case 'saveBoardSettings':
+			window.localStorage.chaosMode = event.data.arg.chaosMode;
+			reseedBoardWithSeed(event.data.arg.boardSeed);
 			break;
-		case 'setWeaponSeed':
-			weapons = setWeaponSeed(event.data.arg);
+		case 'saveWeaponSettings':
+			console.log(event.data.arg);
+
+			window.localStorage.noDuplicateWeapons = event.data.arg.noDuplicateWeapons;
+			window.localStorage.boardWeaponsOnly = event.data.arg.boardWeaponsOnly;
+
+
+			weapons = setWeaponSeed(event.data.arg.weaponSeed);
 			break;
 		case 'resetWeaponSeed':
 			weapons = setWeaponSeed();

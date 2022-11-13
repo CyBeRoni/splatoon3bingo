@@ -11,18 +11,18 @@
             <fieldset>
                 <legend>Random Weapon</legend>
                 <div>
-                    <button class="button fullwidth sendbutton" data-msg="randomWeapon">New Weapon</button>
+                    <button class="button fullwidth sendbutton" onclick="" data-msg="randomWeapon">New Weapon</button>
                     <!-- <button class="button fullwidth" data-msg="resetUnknown">Unknown Weapon</button><br/> -->
                     <button class="button halfwidth is-green sendbutton" data-msg="setGreen">Green</button>
                     <button class="button halfwidth is-red sendbutton" data-msg="setRed">Red</button>
                 </div>
             </fieldset>
-            <fieldset>
+            <!-- <fieldset>
                 <legend>Bingo Board</legend>
                 <div>
                     <button class="button fullwidth is-yellow sendbutton" data-msg="clearBoard"><i class="bi bi-arrow-clockwise"></i> Reroll</button>
                 </div>
-            </fieldset>
+            </fieldset> -->
             <fieldset>
                 <legend>Visibility</legend>
                 <div class="subcontainer">
@@ -37,8 +37,11 @@
                     <input id="s-stb" type="checkbox" class="switch storetoggle" data-msg="seethroughBoard"/><label for="s-stb">Translucent Board</label><br/>
                     <input id="s-ahb" type="checkbox" class="switch storetoggle" data-msg="autoHideBoard"/><label for="s-ahb">Auto-hide Board (20s)</label>
                     <input id="s-swn" type="checkbox" class="switch storetoggle" data-msg="showWeaponNames"><label for="s-swn">Show weapon names</label>
-                    <input id="s-cm" type="checkbox" class="switch storetoggle" data-msg="chaosMode"><label for="s-swn">Chaos Mode</label>
-                    <input id="t-bseed" type="text" style="width: 45%" class="storetext" data-msg="boardSeed" placeholder="seed"><label for="t-bseed"><button class="button is-outline" onclick="setBoardSeed()"><i class="bi bi-save"></i></button>Seed</label>
+                    <hr/>
+                    <input id="s-cm" type="checkbox" class="switch receivetoggle needssave" data-save="saveBoard" data-msg="chaosMode"><label for="s-cm">Chaos Mode</label>
+                    <input id="t-bseed" type="text" style="width: 45%" class="storetext needssave" data-save="saveBoard" data-msg="boardSeed" placeholder="seed">
+                    <label for="t-bseed"><button class="button is-outline needssave" onclick="newSeed(this)" data-save="saveBoard" data-target="t-bseed"><i class="bi bi-arrow-clockwise"></i></button>Seed</label>
+                    <button class="button is-outline fullwidth" disabled onclick="saveBoardSettings(this)" id="saveBoard"><i class="bi bi-save"></i><div>Save</div></button>
                 </div>
             </fieldset>
             <fieldset>
@@ -46,6 +49,13 @@
                 <div class="subcontainer">
                     <input id="s-sw" type="checkbox" class="switch storetoggle" data-msg="smallWeapon"/><label for="s-sw">Reduce size</label><br/>
                     <hr/>
+                    <input id="s-bwo" type="checkbox" class="switch receivetoggle needssave" data-save="saveWeapon" data-msg="boardWeaponsOnly"><label for="s-bwo">Board weapons only</label>
+                    <input id="s-ndw" type="checkbox" class="switch receivetoggle needssave" data-save="saveWeapon" data-msg="noDuplicateWeapons"><label for="s-ndw">No duplicate weapons</label>
+                    <input id="t-wseed" type="text" style="width: 45%" class="storetext needssave" data-save="saveWeapon" data-msg="weaponSeed" placeholder="seed">
+                    <label for="t-wseed"><button class="button is-outline needssave" onclick="newSeed(this)" data-save="saveWeapon" data-target="t-wseed"><i class="bi bi-arrow-clockwise"></i></button>Seed</label>
+                    <!-- <button class="button fullwidth is-small is-outline sendbutton" data-msg="resetWeaponSeed"><i class="bi bi-arrow-clockwise"></i> Reroll Weapons</button> -->
+                    <button class="button is-outline fullwidth" disabled onclick="saveWeaponSettings(this)" id="saveWeapon"><i class="bi bi-save"></i><div>Save</div></button>
+                    <div class="warning"><i class="bi bi-exclamation-triangle"></i><span>Save resets weapons</span></div>
                 </div>
             </fieldset>
         </div>
@@ -91,7 +101,7 @@
             })
         }
 
-        document.querySelectorAll(".storetoggle").forEach(elem => {
+        document.querySelectorAll(".storetoggle,.receivetoggle").forEach(elem => {
             let key = elem.dataset.msg;
             let item = window.localStorage.getItem(key);
             elem.checked = item === "true" || (defaults[key] === true && item == undefined);
@@ -111,17 +121,56 @@
             });
         });
 
+        document.querySelectorAll("input.needssave").forEach(elem => {
+            elem.addEventListener('input', (event) =>{
+                document.querySelector(`#${event.currentTarget.dataset.save}`).disabled = false;
+            })
+        })
 
-        function setBoardSeed(){
+        document.querySelectorAll("button.needssave").forEach(elem => {
+            elem.addEventListener('click', (event) =>{
+                console.log(event);
+                document.querySelector(`#${event.currentTarget.dataset.save}`).disabled = false;
+            })
+        })
+
+
+
+
+        function saveBoardSettings(target){
             let boardSeed = document.querySelector("#t-bseed").value;
+            let chaosMode = document.querySelector("#s-cm").checked;
 
-            bc.postMessage({function: "reseedBoardWithSeed", arg: boardSeed});
+            let settings = {
+                boardSeed: boardSeed,
+                chaosMode: chaosMode
+            }
+
+            console.log(settings);
+
+            bc.postMessage({function: "saveBoardSettings", arg: settings});
+
+            target.disabled = true;
         }
 
-        function setWeaponSeed(){
+        function saveWeaponSettings(target){
             let weaponSeed = document.querySelector("#t-wseed").value;
+            let boardWeaponsOnly = document.querySelector("#s-bwo").checked;
+            let noDuplicateWeapons = document.querySelector('#s-ndw').checked;
 
-            bc.postMessage({function: "setWeaponSeed", arg: weaponSeed});
+            let settings = {
+                weaponSeed: weaponSeed,
+                boardWeaponsOnly: boardWeaponsOnly,
+                noDuplicateWeapons: noDuplicateWeapons
+            }
+
+            bc.postMessage({function: "saveWeaponSettings", arg: settings});
+            target.disabled = true;
+
+        }
+
+        function newSeed(target){
+            document.querySelector(`#${target.dataset.target}`).value = Math.ceil(Math.random() * 999999);
         }
 
     </script>

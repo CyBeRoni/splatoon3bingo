@@ -63,3 +63,20 @@ div.subcontainer {
     height: inherit;
 }
 
+.bi {
+    display: inline-block;
+    vertical-align: -0.125em;
+    fill: currentcolor;
+}
+
+.bi + div, .bi + span {
+    margin-left: 4px;
+}
+
+div.warning {
+    text-align: center;
+}
+
+div.warning i.bi {
+    color: yellow;
+}
