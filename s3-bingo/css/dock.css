@@ -45,3 +45,21 @@ div.subcontainer {
     text-align: left;
 }
 
+/* These break on older OBS apparently */
+.is-green {
+    --buttonBg: var(--green);
+}
+
+.is-red {
+    --buttonBg: var(--red);
+}
+
+.is-yellow {
+    --buttonBg: var(--yellow);
+    color: black;
+}
+
+.button {
+    height: inherit;
+}
+
