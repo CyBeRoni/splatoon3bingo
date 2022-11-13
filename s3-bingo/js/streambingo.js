@@ -282,13 +282,19 @@ function toggleWeaponNames(){
 }
 
 function setSmallBoard(val, instant){
+	setSmallItem(document.querySelector("#results"), val, instant)
+}
+function setSmallWeapon(val, instant){
+	setSmallItem(document.querySelector("#randomweapon"), val, instant);
+}
+
+function setSmallItem(item, val, instant){
 	let scale = 1;
 	let originLR = "right";
 	let originTB = "top";
 	let animate = gsap.to;
 
-	let table = document.querySelector("#results");
-	let pos = table.getBoundingClientRect();
+	let pos = item.getBoundingClientRect();
 	let bodysize = document.body.getBoundingClientRect();
 
 	if (pos.x + (pos.width / 2) < bodysize.width / 2){
@@ -303,7 +309,7 @@ function setSmallBoard(val, instant){
 		animate = gsap.set;
 
 	let origin = `${originTB} ${originLR}`;
-	animate("#results", {scale: scale, transformOrigin: origin});
+	animate(item, {scale: scale, transformOrigin: origin});
 }
 
 function setseethroughBoard(val, instant){
@@ -450,6 +456,10 @@ setStorageCallback("showWeaponNames", (e) => {
 
 setStorageCallback("smallBoard", (e) => {
 	setSmallBoard(e.newValue === "true");
+});
+
+setStorageCallback("smallWeapon", (e) => {
+	setSmallWeapon(e.newValue === "true");
 });
 
 setStorageCallback("seethroughBoard", (e) => {
