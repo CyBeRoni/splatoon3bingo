@@ -11,6 +11,7 @@ html {
 
 body {
 	background-color: rgb(24, 24, 24);
+
 	/* background-color: red; */
 	color:#bec7d2;
 	font-family:Helvetica, Arial, sans-serif;
@@ -143,7 +144,7 @@ td {
 	text-align: left;
 	font-size: 32px;
 	align-items: center;
-	width: 100%;
+	width: 90%;
 	height: 55%;
 	text-shadow: #000 2px 2px;
 	transform: rotate(-2deg);
@@ -161,13 +162,14 @@ td {
 #randomweapon_middletext {
 	grid-column: 2 / 3;
 	grid-row: 2 / 3;
-	font-size: 90%;
+	font-size: 70%;
 }
 
 #randomweapon_bottomtext {
 	grid-column: 2 / 3;
 	grid-row: 3 / 4;
-	font-size: 120%
+	font-size: 100%;
+	line-height: 1;
 }
 
 #randomweapon_weapon {
