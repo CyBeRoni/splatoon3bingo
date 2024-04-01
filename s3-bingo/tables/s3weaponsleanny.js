@@ -13,7 +13,9 @@ async function init_weapons(){
     weaponMap.set('Blaster', get_weapons_by_category("Blaster"));
     weaponMap.set('Slosher', get_weapons_by_category("Slosher"));
     weaponMap.set('Dualies', get_weapons_by_category("Maneuver"));
-    weaponMap.set('BrushRoller', get_weapons_by_category(["Roller", "Brush"]));
+    weaponMap.set('Brush', get_weapons_by_category("Roller"));
+    weaponMap.set('Roller', get_weapons_by_category("Brush"));
+    weaponMap.set('Brella', get_weapons_by_category("Shelter"));
     weaponMap.set('Misc', get_weapons_by_category(["Stringer", "Saber"]));
 }
 
