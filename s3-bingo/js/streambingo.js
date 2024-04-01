@@ -57,8 +57,11 @@ function setup(){
 		document.body.appendChild(dock);
 	}
 
-	board = generateBoard(false, window.localStorage.boardSeed, false);
-	weapons = setWeaponSeed(window.localStorage.weaponSeed);
+	init_weapons().then(() => {
+		board = generateBoard(false, window.localStorage.boardSeed, false);
+		weapons = setWeaponSeed(window.localStorage.weaponSeed);
+	});
+
 
 	// Enable clicking squares to mark green or red
 	document.querySelectorAll("td.slot").forEach(elem => {
