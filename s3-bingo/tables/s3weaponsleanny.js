@@ -71,11 +71,11 @@ async function get_weapons(version){
             internalName: e.__RowId,
             id: e.Id,
             name: lang[e.__RowId],
-            image: urlForFilename("images/weapon_flat/Path_Wst_", e.__RowId, "webp"),
-            stickerImage: urlForFilename("images/zakka/", getFilenameOfReward(e.RewardLv2), "webp"),
-            stickerImageShiny: urlForFilename("images/zakka/", getFilenameOfReward(e.RewardLv3), "webp"),
-            badgeImage: urlForFilename("images/badge/", getFilenameOfReward(e.RewardLv4), "webp"),
-            badgeImageGold: urlForFilename("images/badge/", getFilenameOfReward(e.RewardLv5), "webp"),
+            image: urlForFilename("images/weapon_flat/Path_Wst_", e.__RowId, "png"),
+            stickerImage: urlForFilename("images/zakka/", getFilenameOfReward(e.RewardLv2), "png"),
+            stickerImageShiny: urlForFilename("images/zakka/", getFilenameOfReward(e.RewardLv3), "png"),
+            badgeImage: urlForFilename("images/badge/", getFilenameOfReward(e.RewardLv4), "png"),
+            badgeImageGold: urlForFilename("images/badge/", getFilenameOfReward(e.RewardLv5), "png"),
             internalType: e.DefaultHitEffectorType,
             type: e.__RowId.split("_")[0]
         })
