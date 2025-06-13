@@ -1,6 +1,7 @@
 "use strict";
 
 const vsWeapons = [];
+const weapBadges = [];
 const weaponMap = new Map();
 
 async function init_weapons(){
@@ -56,29 +57,65 @@ async function get_language(language = "EUen"){
     return r["CommonMsg/Weapon/WeaponName_Main"];
 }
 
+async function get_badges(version){
+    let res = await fetch(`https://leanny.github.io/splat3/data/mush/${version}/BadgeInfo.json`);
+
+    let r = await res.json();
+    return r;
+}
+
+function badgeForWeapon(weapon, level){
+    let name = "WeaponLevel_" + weapon + "_" + level;
+
+    let badge = weapBadges.find(e => { return e.Name === name });
+
+    return badge.__RowId;
+}
+
 async function get_weapons(version){
-    console.log("Grabbing weapons for game version " + version)
+    console.log("Grabbing weapons for game version " + version);
 
     let res = await fetch(`https://leanny.github.io/splat3/data/mush/${version}/WeaponInfoMain.json`);
     let weapons = await res.json();
+
+    if (version >= 1000){
+        console.log("Grabbing badges for game version " + version);
+        weapBadges.length = 0;
+
+        let badges = await get_badges(version);
+        badges.forEach(e => {
+            if (e.Category === "WeaponLevel")
+                weapBadges.push(e);
+        })
+    }
 
     let lang = await get_language();
 
     vsWeapons.length = 0;
 
-    weapons.filter(e => e.Type == "Versus" && e.Season >= 0 ).forEach(e => {
-        vsWeapons.push({
-            internalName: e.__RowId,
+    // Filter weapons to exclude non-multiplayer (Type==Versus) and Order weapons (ShopPrice > 0),
+    // but add the base Splattershot Jr (Shooter_First_00) because it also has a price of 0.
+    weapons.filter(e => { return (e.Type == "Versus" && e.ShopPrice > 0) || e.__RowId === "Shooter_First_00" }).forEach(e => {
+
+        let weapon = {
+            name: e.__RowId,
             id: e.Id,
-            name: lang[e.__RowId],
+            label: lang[e.__RowId],
             image: urlForFilename("images/weapon_flat/Path_Wst_", e.__RowId, "png"),
             stickerImage: urlForFilename("images/zakka/", getFilenameOfReward(e.RewardLv2), "png"),
             stickerImageShiny: urlForFilename("images/zakka/", getFilenameOfReward(e.RewardLv3), "png"),
-            badgeImage: urlForFilename("images/badge/", getFilenameOfReward(e.RewardLv4), "png"),
-            badgeImageGold: urlForFilename("images/badge/", getFilenameOfReward(e.RewardLv5), "png"),
-            internalType: e.DefaultHitEffectorType,
-            type: e.__RowId.split("_")[0]
-        })
+            type: e.DefaultHitEffectorType,
+        };
+
+        if (version >= 1000){
+            weapon.badgeImage = urlForFilename("images/badge/", getFilenameOfReward(badgeForWeapon(e.__RowId, "Lv00")), "png");
+            weapon.badgeImageGold = urlForFilename("images/badge/", getFilenameOfReward(badgeForWeapon(e.__RowId, "Lv01")), "png");
+        } else {
+            weapon.badgeImage = urlForFilename("images/badge/", getFilenameOfReward(e.RewardLv4), "png");
+            weapon.badgeImageGold = urlForFilename("images/badge/", getFilenameOfReward(e.RewardLv5), "png");
+        }
+
+        vsWeapons.push(weapon);
         e.Label = lang[e.__RowId];
     })
 }
@@ -99,6 +136,6 @@ function get_weapons_by_category(category){
 }
 
 function get_weapons_by_internal_type(type){
-    return vsWeapons.filter((e) => e.internalType === type);
+    return vsWeapons.filter((e) => e.type === type);
 }
 

@@ -113,9 +113,9 @@ function generateBoard(reseed, seed, sound = true){
 	.set(".slotcontent", {onComplete: function(){
 		this.targets().forEach(e => {
 			let i = parseInt(e.dataset.index) - 1;
-			e.dataset.weapon = bingoBoard[i].name;
+			e.dataset.weapon = bingoBoard[i].label;
 			e.querySelector(".slotweaponimage img").src = bingoBoard[i].image;
-			e.querySelector(".slotweaponname").innerHTML = bingoBoard[i].name;
+			e.querySelector(".slotweaponname").innerHTML = bingoBoard[i].label;
 		});
 	}})
 	.set(".slotweaponimage img", { opacity: 0, scale: 0})
@@ -142,7 +142,7 @@ function randomWeapon() {
 	let weapon = weapons.nextWeapon();
 
 	if (weapon){
-		setRandomWeapon(weapon.name, weapon.image);
+		setRandomWeapon(weapon.label, weapon.image);
 		currentRandomWeapon = weapon;
 	} else {
 		setRandomWeapon("sheldon");
