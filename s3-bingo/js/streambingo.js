@@ -382,7 +382,7 @@ function findTileForWeapon(weapon){
 
 	let elems = Array.from(document.querySelectorAll(".slotcontent"));
 
-	return elems.find(e => { return e.dataset.weapon == weapon.name});
+	return elems.find(e => { return e.dataset.weapon == weapon.label});
 }
 
 function setGreen(){
